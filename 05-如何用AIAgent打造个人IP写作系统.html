@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>如何用 AI Agent 打造个人 IP 写作系统？ — 北辰青年线下分享</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #faf9f6;
+    --paper-warm: #f5f0ea;
+    --accent: #c0392b;
+    --accent-light: #e74c3c;
+    --muted: #6b6b6b;
+    --gold: #d4a053;
+    --deep: #2c3e50;
+    --border: #e0dcd5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a08;
+    font-family: 'Noto Sans SC', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 0;
+    gap: 40px;
+  }
+
+  .deck-info {
+    color: #888;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-align: center;
+    letter-spacing: 0.1em;
+  }
+
+  .slide {
+    position: relative;
+    width: 1280px;
+    max-width: 96vw;
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    padding: 72px 96px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .slide .slide-num {
+    position: absolute;
+    top: 28px;
+    right: 36px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    opacity: 0.5;
+  }
+
+  .slide .eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .slide .eyebrow.gold { color: var(--gold); }
+  .slide .eyebrow.deep { color: var(--deep); }
+
+  /* Cover slide */
+  .slide.cover {
+    background: linear-gradient(160deg, #1a1a1a 0%, #2c2c2c 40%, #3d3020 100%);
+    color: #faf9f6;
+    justify-content: center;
+  }
+
+  .slide.cover .eyebrow { color: var(--gold); }
+
+  .slide.cover h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 64px;
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    max-width: 800px;
+  }
+
+  .slide.cover h1 em {
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  .slide.cover .subtitle {
+    font-size: 22px;
+    font-weight: 400;
+    color: rgba(250,249,246,0.6);
+    margin-top: 32px;
+    line-height: 1.6;
+  }
+
+  .slide.cover .meta {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 15px;
+    color: rgba(250,249,246,0.5);
+  }
+
+  .slide.cover .meta .avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: grid; place-items: center;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: #1a1a1a;
+  }
+
+  /* Dark slide */
+  .slide.dark {
+    background: linear-gradient(160deg, #1a1a1a 0%, #2a2520 100%);
+    color: #faf9f6;
+  }
+
+  .slide.dark h2 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+
+  .slide.dark p {
+    font-size: 22px;
+    line-height: 1.7;
+    color: rgba(250,249,246,0.7);
+    max-width: 60ch;
+  }
+
+  /* Light slide */
+  .slide h2 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin-bottom: 28px;
+  }
+
+  .slide h2 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .slide p {
+    font-size: 20px;
+    line-height: 1.75;
+    color: var(--muted);
+    max-width: 55ch;
+  }
+
+  .slide p strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* Accent slide */
+  .slide.accent {
+    background: var(--paper-warm);
+  }
+
+  /* Number list */
+  .num-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .num-list li {
+    font-size: 20px;
+    line-height: 1.65;
+    color: var(--muted);
+    padding-left: 48px;
+    position: relative;
+  }
+
+  .num-list li strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .num-list li .num {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    font-family: 'Noto Serif SC', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    opacity: 0.7;
+  }
+
+  /* Card grid */
+  .card-grid {
+    display: grid;
+    gap: 20px;
+    margin-top: 32px;
+  }
+
+  .card-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .card-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .card-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+  .card {
+    padding: 28px 24px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--border);
+  }
+
+  .card .card-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .card .card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+
+  .card .card-desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .card.dark {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .card.dark .card-title { color: #faf9f6; }
+  .card.dark .card-desc { color: rgba(250,249,246,0.6); }
+
+  /* Quote */
+  .big-quote {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    max-width: 700px;
+  }
+
+  .big-quote em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .slide.dark .big-quote { color: #faf9f6; }
+  .slide.dark .big-quote em { color: var(--gold); }
+
+  .quote-source {
+    font-size: 16px;
+    color: var(--muted);
+    margin-top: 16px;
+  }
+
+  /* Section divider */
+  .section-divider {
+    height: 3px;
+    width: 60px;
+    background: var(--accent);
+    margin: 28px 0;
+    border-radius: 2px;
+  }
+
+  .slide.dark .section-divider { background: var(--gold); }
+
+  /* Flow diagram */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+
+  .flow-item {
+    padding: 16px 24px;
+    border-radius: 10px;
+    background: var(--paper-warm);
+    border: 1px solid var(--border);
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    min-width: 140px;
+  }
+
+  .flow-arrow {
+    font-size: 24px;
+    color: var(--accent);
+  }
+
+  /* Bullet list */
+  .bullet-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .bullet-list li {
+    font-size: 20px;
+    line-height: 1.65;
+    color: var(--muted);
+    padding-left: 28px;
+    position: relative;
+  }
+
+  .bullet-list li::before {
+    content: '·';
+    position: absolute;
+    left: 4px;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.4;
+  }
+
+  .bullet-list li strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .slide.dark .bullet-list li { color: rgba(250,249,246,0.7); }
+  .slide.dark .bullet-list li strong { color: #faf9f6; }
+  .slide.dark .bullet-list li::before { color: var(--gold); }
+
+  /* Thanks slide */
+  .slide.thanks {
+    background: linear-gradient(160deg, #1a1a1a 0%, #2c2c2c 40%, #3d3020 100%);
+    color: #faf9f6;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .slide.thanks h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 72px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+  }
+
+  .slide.thanks .sub {
+    font-size: 22px;
+    color: rgba(250,249,246,0.5);
+    margin-top: 24px;
+  }
+
+  .slide.thanks .qr-note {
+    margin-top: auto;
+    font-size: 15px;
+    color: rgba(250,249,246,0.35);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Two-column */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    margin-top: 24px;
+  }
+
+  .two-col .col h3 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+
+  .slide.dark .two-col .col h3 { color: var(--gold); }
+
+  /* Tag */
+  .tag {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    background: rgba(192,57,43,0.1);
+    color: var(--accent);
+    margin-right: 8px;
+  }
+
+  .slide.dark .tag {
+    background: rgba(212,160,83,0.15);
+    color: var(--gold);
+  }
+
+  /* Highlight bar */
+  .highlight-bar {
+    background: linear-gradient(135deg, var(--accent), #e74c3c);
+    color: #fff;
+    padding: 24px 36px;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1.6;
+    margin-top: 24px;
+    max-width: 700px;
+  }
+
+  .highlight-bar em {
+    font-style: normal;
+    font-weight: 700;
+  }
+
+  .slide.dark .highlight-bar {
+    background: linear-gradient(135deg, var(--gold), #e6b85c);
+    color: #1a1a1a;
+  }
+
+  /* Progress indicator */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+    z-index: 1000;
+  }
+
+  .slide-nav {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.75);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+  }
+
+  /* Responsive */
+  @media (max-width: 1300px) {
+    .slide { padding: 48px 64px; }
+    .slide.cover h1 { font-size: 48px; }
+    .slide h2 { font-size: 36px; }
+    .slide.dark h2 { font-size: 40px; }
+    .big-quote { font-size: 32px; }
+    .two-col { gap: 32px; }
+  }
+
+  @media (max-width: 900px) {
+    .slide { padding: 36px 40px; }
+    .slide.cover h1 { font-size: 36px; }
+    .slide h2 { font-size: 28px; }
+    .card-grid.cols-3 { grid-template-columns: repeat(2, 1fr); }
+    .card-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="slide-nav" id="slideNav">1 / 26</div>
+<div class="deck-info">↑↓ 或 ←→ 键翻页 · 空格下一页</div>
+
+<div class="deck" id="deck">
+
+<!-- ====== SLIDE 1: COVER ====== -->
+<section class="slide cover">
+  <span class="slide-num" style="color:rgba(250,249,246,0.3)">01 / 26</span>
+  <div class="eyebrow">北辰青年 · 线下分享 2026.05.30</div>
+  <h1>如何用 <em>AI Agent</em><br/>打造个人 IP 写作系统？</h1>
+  <div class="subtitle">从底层规律到实战系统，让 AI 成为你的写作搭档</div>
+  <div class="meta">
+    <div class="avatar">杨</div>
+    <div>
+      <div style="color:rgba(250,249,246,0.8); font-weight:500">杨昱轩</div>
+      <div>15年内容从业者 · AI-101社群发起人</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SLIDE 2: 自我介绍 ====== -->
+<section class="slide">
+  <span class="slide-num">02 / 26</span>
+  <div class="eyebrow">关于我</div>
+  <h2>站在<em>结构洞</em>上的人</h2>
+  <div class="two-col">
+    <div class="col">
+      <ul class="bullet-list">
+        <li><strong>15年内容从业经历</strong>，南方报业出身，完整经历从微博到公众号再到短视频平台的新媒体发展</li>
+        <li>至少<strong>4次从0到1</strong>创建新媒体品牌，操盘账号粉丝总量<strong>近700万</strong></li>
+        <li>深度辅导超<strong>150位</strong>小而美品牌个人IP学员拿到结果</li>
+      </ul>
+    </div>
+    <div class="col">
+      <ul class="bullet-list">
+        <li><strong>AI 深度玩家</strong>，最早的 vibe coder</li>
+        <li>2026年4月发起 <strong>AI-101 社群</strong>，面向非技术背景个体创业者</li>
+        <li>已连续日更至<strong>第51天</strong>，每天分享 AI 使用心得</li>
+      </ul>
+    </div>
+  </div>
+  <div class="highlight-bar">
+    既懂内容传播和个人IP的方法规律，又能把 AI 用在个人IP的工作系统里，<em>并以普通人能理解的方式讲明白。</em>
+  </div>
+</section>
+
+<!-- ====== SLIDE 3: 核心问题 ====== -->
+<section class="slide dark">
+  <span class="slide-num">03 / 26</span>
+  <div class="eyebrow gold">核心问题</div>
+  <h2 style="margin-top:auto; margin-bottom:32px">AI时代，为什么还要<br/><span style="color:var(--gold)">手搓内容</span>？</h2>
+  <p style="font-size:20px; color:rgba(250,249,246,0.6); max-width:50ch">
+    很多人都盼着 AI 能真正成为内容生产的自动化机器，只要按一个键，就能有源源不断的内容产生出来……<br/>
+    <strong style="color:#faf9f6">但这是不可能的。</strong>
+  </p>
+  <div style="margin-top:auto; font-size:18px; color:rgba(250,249,246,0.45); font-family:'JetBrains Mono',monospace; letter-spacing:0.1em">
+    为什么？先看个人 IP 的本质 ↓
+  </div>
+</section>
+
+<!-- ====== SLIDE 4: IP 的本质 ====== -->
+<section class="slide">
+  <span class="slide-num">04 / 26</span>
+  <div class="eyebrow">本质</div>
+  <h2>个人 IP = <em>你的头脑中真正属于你的东西</em></h2>
+  <div class="card-grid cols-3">
+    <div class="card">
+      <div class="card-icon">🧠</div>
+      <div class="card-title">你的知识体系</div>
+      <div class="card-desc">你掌握的结构化知识，别人无法直接复制</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔧</div>
+      <div class="card-title">你解决问题的方式</div>
+      <div class="card-desc">你的方法论、路径选择、思维习惯</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">💎</div>
+      <div class="card-title">你的价值观</div>
+      <div class="card-desc">你的判断标准、审美、取舍</div>
+    </div>
+  </div>
+  <div class="highlight-bar" style="margin-top:32px">
+    个人IP的本质：<em>打上了你独有生命烙印的知识能力与价值观</em>
+  </div>
+</section>
+
+<!-- ====== SLIDE 5: AI 自动化的矛盾 ====== -->
+<section class="slide accent">
+  <span class="slide-num">05 / 26</span>
+  <div class="eyebrow deep">逻辑冲突</div>
+  <h2>AI自动化生产内容 vs 个人IP，存在<em>三重矛盾</em></h2>
+  <div class="card-grid cols-3">
+    <div class="card" style="border-left: 4px solid var(--accent)">
+      <div class="card-title">矛盾一</div>
+      <div class="card-desc">自动化的前提是<em>标准化</em>，而标准化内容与个人IP的本质相违背——你是特别的，你每时每刻的经历与思考都是不同的</div>
+    </div>
+    <div class="card" style="border-left: 4px solid var(--accent)">
+      <div class="card-title">矛盾二</div>
+      <div class="card-desc">自动化的结果是<em>批量同质化</em>，而同质化内容与内容平台利益相违背，会永远处在灰色地带</div>
+    </div>
+    <div class="card" style="border-left: 4px solid var(--accent)">
+      <div class="card-title">矛盾三</div>
+      <div class="card-desc">自动化的本质是<em>去人化</em>，而个人IP是人存在价值的证明</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SLIDE 6: 关键结论 ====== -->
+<section class="slide dark">
+  <span class="slide-num">06 / 26</span>
+  <p style="text-align:center; font-size:22px; color:rgba(250,249,246,0.7); max-width:50ch; margin:0 auto 24px">
+    个人IP的关键问题，从来不是内容数量，甚至不是效率，而是——
+  </p>
+  <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; text-align:center">
+    <div class="big-quote" style="text-align:center; max-width:750px">
+      你是否<strong style="color:var(--gold)">足够特别</strong>，<br/>
+      并且能让人<strong style="color:var(--gold)">持续信任</strong>。
+    </div>
+    <div class="section-divider" style="margin:32px auto"></div>
+    <p style="text-align:center; font-size:20px; color:rgba(250,249,246,0.6); max-width:50ch">
+      别让 AI 替代你自己，而是让 AI 与你<strong style="color:#faf9f6">相互赋能</strong>。<br/>
+      你是不可替代的核心，AI 再强大也只是你的辅助。
+    </p>
+  </div>
+</section>
+
+<!-- ====== SLIDE 7: 你需要什么 ====== -->
+<section class="slide">
+  <span class="slide-num">07 / 26</span>
+  <div class="eyebrow">结论</div>
+  <h2>你需要一套系统，支持你<em>稳定、持续、高质量</em>地输出</h2>
+  <p>不是只靠碎片灵感，而是有方法论支撑的内容生产系统。</p>
+  <div class="flow" style="justify-content:center; margin-top:48px">
+    <div class="flow-item">📥 输入<br/><span style="font-size:13px;color:var(--muted)">素材积累</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">⚙️ 加工<br/><span style="font-size:13px;color:var(--muted)">思考萃取</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">💡 观点<br/><span style="font-size:13px;color:var(--muted)">独特看法</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">🔥 真实<br/><span style="font-size:13px;color:var(--muted)">个人烙印</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-item">⚡ 能量<br/><span style="font-size:13px;color:var(--muted)">心力支撑</span></div>
+  </div>
+  <p style="text-align:center; margin-top:32px; font-size:16px; color:var(--muted)">
+    接下来，我们从个人IP的 <strong>5条本质规律</strong> 逐一展开
+  </p>
+</section>
+
+<!-- ====== SLIDE 8: 规律一 · 素材规律 (章节页标准) ====== -->
+<section class="slide dark">
+  <span class="slide-num">08 / 26</span>
+  <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%">
+    <div class="eyebrow gold" style="margin-bottom:20px; font-size:16px; letter-spacing:0.3em">规律一：素材规律</div>
+    <h2 style="font-size:68px; text-align:center; max-width:750px; line-height:1.25">
+      "不是你不会写，<br/>
+      <span style="color:var(--gold)">是你没有东西可写</span>"
+    </h2>
+    <p style="text-align:center; margin-top:28px; color:rgba(250,249,246,0.5); font-size:20px">
+      系统的第一层：你需要有一个稳定的输入机制
+    </p>
+  </div>
+</section>
+
+<!-- ====== SLIDE 9: 素材规律 · 细节 ====== -->
+<section class="slide">
+  <span class="slide-num">09 / 26</span>
+  <div class="eyebrow">规律一 · 素材</div>
+  <h2 style="margin-bottom:20px">大多数人失败的根源</h2>
+  <p style="margin-bottom:16px">把 <strong>"灵感"</strong> 当成了生产原料。<br/>但灵感是<strong>不可靠的、偶发的、不可积累的</strong>。</p>
+  <div class="section-divider" style="margin:16px 0"></div>
+  <h3 style="font-size:20px; font-weight:600; margin-bottom:14px; color:var(--ink)">你的输入可以从这些来源来：</h3>
+  <div class="card-grid cols-2" style="gap:14px; margin-top:16px">
+    <div class="card" style="padding:18px 20px">
+      <div class="card-title">📖 读书</div>
+      <div class="card-desc">精读过程中的收获、感想、高频出现的概念</div>
+    </div>
+    <div class="card" style="padding:18px 20px">
+      <div class="card-title">📱 新媒体</div>
+      <div class="card-desc">公众号、短视频、知乎——贴合你定位的二手素材</div>
+    </div>
+    <div class="card" style="padding:18px 20px">
+      <div class="card-title">🎙️ 播客</div>
+      <div class="card-desc">即兴碰撞出的创见，一手素材</div>
+    </div>
+    <div class="card" style="padding:18px 20px">
+      <div class="card-title">💬 交谈</div>
+      <div class="card-desc">别人分享的故事、金句，你碰撞出的想法</div>
+    </div>
+  </div>
+  <div class="highlight-bar" style="margin-top:16px; padding:18px 28px; font-size:18px">
+    我的输入工具：<em>flomo</em> —— 足够简单轻巧，随时打开就能记
+  </div>
+</section>
+
+<!-- ====== SLIDE 10: 规律二 · 加工规律 (章节页) ====== -->
+<section class="slide dark">
+  <span class="slide-num">10 / 26</span>
+  <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%">
+    <div class="eyebrow gold" style="margin-bottom:20px; font-size:16px; letter-spacing:0.3em">规律二：加工规律</div>
+    <h2 style="font-size:68px; text-align:center; max-width:960px; line-height:1.25">
+      "在变成作品前，<br/>
+      <span style="color:var(--gold); white-space:nowrap">你的灵感和输入都不是你的"</span>
+    </h2>
+    <p style="text-align:center; margin-top:28px; color:rgba(250,249,246,0.5); font-size:20px">
+      系统的第二层：通过思考对素材进行萃取
+    </p>
+  </div>
+</section>
+
+<!-- ====== SLIDE 11: 加工规律 · 细节 ====== -->
+<section class="slide accent">
+  <span class="slide-num">11 / 26</span>
+  <div class="eyebrow deep">规律二 · 加工</div>
+  <h2>绝大多数素材，都在笔记软件里<strong>沉睡</strong></h2>
+  <p>没有进一步被思考和加工。</p>
+  <div class="two-col" style="margin-top:24px">
+    <div class="col">
+      <h3>① 记录时不要只摘抄</h3>
+      <p style="font-size:18px">把这个素材<em>为什么触动自己</em>写下来，或者你认为将来它可能可以怎样使用。</p>
+      <p style="font-size:16px; margin-top:10px; color:var(--muted)">卢曼的卡片笔记几乎不会摘抄，而是用自己的话重新叙述。</p>
+    </div>
+    <div class="col">
+      <h3>② 定期整理笔记</h3>
+      <p style="font-size:18px">重看时可能有新感想，可能发现笔记之间的联系，甚至把几篇综合一下就能产出一篇内容了。</p>
+    </div>
+  </div>
+  <div class="big-quote" style="margin-top:28px; font-size:22px; color:var(--muted)">
+    "写作是将网状的思考通过树状的结构用线性的语言表达。"
+    <span class="quote-source"> —— 史蒂芬·平克</span>
+  </div>
+</section>
+
+<!-- ====== SLIDE 12: 规律三 · 观点规律 (章节页) ====== -->
+<section class="slide dark">
+  <span class="slide-num">12 / 26</span>
+  <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%">
+    <div class="eyebrow gold" style="margin-bottom:20px; font-size:16px; letter-spacing:0.3em">规律三：观点规律</div>
+    <h2 style="font-size:68px; text-align:center; max-width:750px; line-height:1.25">
+      "内容的核心是观点，<br/>
+      <span style="color:var(--gold)">没有观点就没有个人IP</span>"
+    </h2>
+    <p style="text-align:center; margin-top:28px; color:rgba(250,249,246,0.5); font-size:20px">
+      系统的第三层：让内容有独特的穿透力
+    </p>
+  </div>
+</section>
+
+<!-- ====== SLIDE 13: 观点规律 · 细节 ====== -->
+<section class="slide dark">
+  <span class="slide-num">13 / 26</span>
+  <div class="eyebrow gold">规律三 · 观点</div>
+  <h2 style="max-width:650px">观点 = 对事物所持的看法、判断或态度</h2>
+  <div class="section-divider"></div>
+  <p style="font-size:20px; color:rgba(250,249,246,0.7); max-width:55ch">
+    它具有主观性，不是事实。恰恰因为主观，每一个观点都呈现了一个看待世界的视角，都呈现了真相的一面。
+  </p>
+  <div class="card-grid cols-3" style="margin-top:28px">
+    <div class="card dark">
+      <div class="card-title">立场</div>
+      <div class="card-desc">没有所谓的好天气——晴天对染坊老板是好天气，对雨伞老板就不是</div>
+    </div>
+    <div class="card dark">
+      <div class="card-title">工具</div>
+      <div class="card-desc">皮肤上的一颗痣，在我们眼里只是黑点，在显微镜下是细胞活体</div>
+    </div>
+    <div class="card dark">
+      <div class="card-title">条件</div>
+      <div class="card-desc">牛顿力学曾被认为是真理，但相对论在更大尺度上修正了它</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SLIDE 14: 观点的价值 ====== -->
+<section class="slide">
+  <span class="slide-num">14 / 26</span>
+  <div class="eyebrow">观点的价值</div>
+  <h2>观点，决定了你是<em>同维内卷</em>还是<em>错维打击</em></h2>
+  <ul class="bullet-list">
+    <li><strong>观点 = 视角</strong>：每一个观点都呈现了真相的一面，都呈现了一个看待世界的角度</li>
+    <li><strong>观点 = 标题</strong>：往往可以直接呈现为标题或封面文案，决定打开率</li>
+    <li><strong>观点 = 独特性</strong>：这个独特性、生命烙印、价值观，就是通过观点体现的</li>
+    <li><strong>观点 = 结构</strong>：金字塔原理——结论先行，以上统下</li>
+  </ul>
+  <div class="highlight-bar" style="margin-top:28px">
+    <em>五仁月饼的类比</em>：核桃花生芝麻，做成月饼会更值钱 —— 观点就是那个把零散素材变成值钱作品的"月饼模具"
+  </div>
+</section>
+
+<!-- ====== SLIDE 15: 规律四 · 真实规律 (章节页) ====== -->
+<section class="slide dark">
+  <span class="slide-num">15 / 26</span>
+  <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%">
+    <div class="eyebrow gold" style="margin-bottom:20px; font-size:16px; letter-spacing:0.3em">规律四：真实规律</div>
+    <h2 style="font-size:68px; text-align:center; max-width:650px; line-height:1.25">
+      "一切的卡点，<br/>
+      <span style="color:var(--gold)">都与真实有关</span>"
+    </h2>
+    <p style="text-align:center; margin-top:28px; color:rgba(250,249,246,0.5); font-size:20px">
+      系统的第四层：输出"你的"内容，而不是"某个人的"内容
+    </p>
+  </div>
+</section>
+
+<!-- ====== SLIDE 16: 真实规律 · 细节 ====== -->
+<section class="slide dark">
+  <span class="slide-num">16 / 26</span>
+  <div class="eyebrow gold">规律四 · 真实</div>
+  <h2 style="max-width:600px">内容是一种社交，社交就是人与人的连接</h2>
+  <div class="section-divider"></div>
+  <p style="font-size:20px; color:rgba(250,249,246,0.7); max-width:55ch">
+    如果你想要连接到更多的人，那么就要先把<strong style="color:#faf9f6">真实的你自己</strong>展现出来。
+  </p>
+  <ul class="bullet-list" style="margin-top:20px">
+    <li><strong>你会变得轻松</strong> —— 因为伪装需要格外花很多心思来维持</li>
+    <li><strong>你的内容会变得独特</strong> —— 没有人会与你有完全相同的经历和感受</li>
+    <li><strong>你的内容会更容易感染他人</strong> —— 因为他们会在你的身上照见他们自己</li>
+  </ul>
+</section>
+
+<!-- ====== SLIDE 17: 王炸技巧 ====== -->
+<section class="slide accent">
+  <span class="slide-num">17 / 26</span>
+  <div class="eyebrow deep">王炸技巧</div>
+  <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center">
+    <div class="big-quote" style="text-align:center; max-width:650px">
+      当你不知道写什么的时候，<br/>
+      <em>写一句真实的话。</em>
+    </div>
+    <p style="margin-top:32px; font-size:20px; color:var(--muted); max-width:50ch">
+      无论这句话是你此刻的感受、你的担忧、你的焦虑，还是你所处的环境、你正在做的事情，都可以写。<br/>
+      然后，继续往下写第二句，第三句……
+    </p>
+  </div>
+</section>
+
+<!-- ====== SLIDE 18: 规律五 · 能量规律 (章节页) ====== -->
+<section class="slide dark">
+  <span class="slide-num">18 / 26</span>
+  <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%">
+    <div class="eyebrow gold" style="margin-bottom:20px; font-size:16px; letter-spacing:0.3em">规律五：能量规律</div>
+    <h2 style="font-size:68px; text-align:center; max-width:780px; line-height:1.25">
+      "个人IP最重要的资产，<br/>
+      <span style="color:var(--gold)">除了知识，就是能量</span>"
+    </h2>
+    <p style="text-align:center; margin-top:28px; color:rgba(250,249,246,0.5); font-size:20px">
+      系统的第五层：心力支撑你走下去
+    </p>
+  </div>
+</section>
+
+<!-- ====== SLIDE 19: 能量规律 · 细节 ====== -->
+<section class="slide dark">
+  <span class="slide-num">19 / 26</span>
+  <div class="eyebrow gold">规律五 · 能量</div>
+  <h2 style="max-width:650px">如果打造个人IP失败，最可能的原因是什么？</h2>
+  <div class="section-divider"></div>
+  <p style="font-size:20px; color:rgba(250,249,246,0.7); max-width:55ch">
+    <strong style="color:#faf9f6">根本原因只有一个：你的心力没有支撑你走下去。</strong>
+  </p>
+  <p style="margin-top:20px; font-size:18px; color:rgba(250,249,246,0.55); max-width:50ch">
+    深度辅导150多位学员后得出的结论：无论购买的是哪种知识服务，能够拿到结果的人，都有一个共同点——
+  </p>
+  <div class="highlight-bar" style="margin-top:16px">
+    <em>坚持行动、百折不挠的心力</em>，经常保持着高能量状态，让自己不断成长，实现一个又一个突破。
+  </div>
+</section>
+
+<!-- ====== SLIDE 20: 晨间笔记 ====== -->
+<section class="slide">
+  <span class="slide-num">20 / 26</span>
+  <div class="eyebrow">能量管理</div>
+  <h2>推荐一个好习惯：<em>晨间笔记</em>（自由书写）</h2>
+  <p>早晨起床后，打开文档或纸笔，把内心升起的种种想法念头，<em>不加思考、不加评判地写下来</em>。</p>
+  <div class="card-grid cols-2" style="margin-top:24px">
+    <div class="card">
+      <div class="card-icon">⏱️</div>
+      <div class="card-title">10-15分钟</div>
+      <div class="card-desc">唯一的要求：不要思考，不要评判，不要修改，一口气把心里的话倾泻而出</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🧹</div>
+      <div class="card-title">客体化 + 宣泄</div>
+      <div class="card-desc">帮你把内耗和负面情绪客体化，并得到合适的宣泄</div>
+    </div>
+  </div>
+  <div class="highlight-bar" style="margin-top:20px">
+    系统需要能帮我们<em>聚焦目标，减少决策损耗，减少精神内耗，获得能量回补</em>。
+  </div>
+</section>
+
+<!-- ====== SLIDE 21: PART 2 DIVIDER ====== -->
+<section class="slide dark">
+  <span class="slide-num">21 / 26</span>
+  <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%">
+    <div class="eyebrow gold" style="margin-bottom:16px; font-size:14px">Part 2</div>
+    <h2 style="font-size:48px; text-align:center; max-width:600px">
+      我的 AI Agent<br/>
+      <span style="color:var(--gold)">个人IP写作系统</span><br/>实践
+    </h2>
+    <p style="margin-top:24px; color:rgba(250,249,246,0.5); font-size:18px; text-align:center; max-width:45ch">
+      这个世界现在唯一的大事，就是 AI
+    </p>
+  </div>
+</section>
+
+<!-- ====== SLIDE 22: 三个 Agent ====== -->
+<section class="slide">
+  <span class="slide-num">22 / 26</span>
+  <div class="eyebrow">我的工具</div>
+  <h2>我在用的 <em>3 个 AI Agent</em></h2>
+  <div class="card-grid cols-3">
+    <div class="card">
+      <div class="card-icon">🔧</div>
+      <div class="card-title">Claude Code</div>
+      <div class="card-desc"><strong>元工具</strong>。不只是编程，可以排查修复错误、改造开源工具、定制 Skill。我的公众号排版 Skill、AI 推文抓取工具，都是用它改造的。</div>
+      <div class="tag" style="margin-top:12px">元工具</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🦞</div>
+      <div class="card-title">OpenClaw</div>
+      <div class="card-desc">2-4月投入最多。合作打磨了记忆系统，初步跑通了从选题灵感到完成初稿的流程。</div>
+      <div class="tag" style="margin-top:12px">记忆系统</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🐴</div>
+      <div class="card-title">Hermes</div>
+      <div class="card-desc"><strong>目前主力</strong>。完成复杂任务能力强，能连续工作二三十分钟交出不差的结果。现在是我的主要 AI 助理。</div>
+      <div class="tag" style="margin-top:12px">主力助理</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SLIDE 23: 输入-加工-输出 ====== -->
+<section class="slide accent">
+  <span class="slide-num">23 / 26</span>
+  <div class="eyebrow deep">工作流</div>
+  <h2>我的内容创作：<em>输入 → 加工 → 输出</em></h2>
+  <div class="card-grid cols-3" style="margin-top:24px">
+    <div class="card">
+      <div class="card-icon">📥</div>
+      <div class="card-title">输入系统：flomo</div>
+      <div class="card-desc">
+        <strong>卡片笔记</strong>，足够简单轻巧<br/>
+        · 闪念笔记：灵感、交谈碎片<br/>
+        · 文献笔记：书、新媒体内容<br/>
+        · 项目笔记：业务相关思考<br/>
+        · 永久笔记：成型作品
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚙️</div>
+      <div class="card-title">加工系统：Obsidian</div>
+      <div class="card-desc">
+        本地数据 + AI 插件<br/>
+        · 贴给 AI 让它提问启发<br/>
+        · 拓展思路<br/>
+        · 提炼写作 Skill<br/>
+        · 晨间笔记 → 独特语料
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📤</div>
+      <div class="card-title">输出系统：Agent + 飞书</div>
+      <div class="card-desc">
+        Agent 打通飞书 CLI<br/>
+        · 创建/编辑飞书文档<br/>
+        · 生成初稿<br/>
+        · 排版 Skill 一键出公众号格式
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SLIDE 24: 实战案例 ====== -->
+<section class="slide dark">
+  <span class="slide-num">24 / 26</span>
+  <div class="eyebrow gold">实战案例</div>
+  <h2>一条灵感 → 一篇公众号文章</h2>
+  <div class="two-col">
+    <div class="col">
+      <h3>① 灵感记录</h3>
+      <p style="font-size:18px; color:rgba(250,249,246,0.7)">
+        感冒打断了跑步训练，有感而发，用语音输入法在 flomo 上记录了一段感想。
+      </p>
+    </div>
+    <div class="col">
+      <h3>② Agent 加工</h3>
+      <p style="font-size:18px; color:rgba(250,249,246,0.7)">
+        复制到飞书文档，把链接发给文案机器人，AI 完成初稿。完成度极高，发到十点读书、洞见完全够格。
+      </p>
+    </div>
+  </div>
+  <div class="highlight-bar" style="margin-top:20px">
+    结果：改了<em>不到30个字</em>就发到公众号，很多读者以为是自己写的。
+  </div>
+  <p style="margin-top:14px; font-size:15px; color:rgba(250,249,246,0.45); white-space:nowrap; overflow:hidden; text-overflow:ellipsis">
+    排版：基于开源工具改造 → <span style="font-family:'JetBrains Mono',monospace; color:var(--gold)">github.com/xiaohuailabs/xiaohu-wechat-format</span>
+  </p>
+</section>
+
+<!-- ====== SLIDE 25: 总结 ====== -->
+<section class="slide">
+  <span class="slide-num">25 / 26</span>
+  <div class="eyebrow">总结</div>
+  <h2>回顾：<em>5条规律 + 3个系统</em></h2>
+  <div class="two-col" style="margin-top:20px">
+    <div class="col">
+      <h3 style="color:var(--accent)">5条本质规律</h3>
+      <ol class="num-list">
+        <li><span class="num">壹</span><strong>素材规律</strong> —— 不是你不会写，是你没有东西可写</li>
+        <li><span class="num">贰</span><strong>加工规律</strong> —— 在变成作品前，灵感和输入都不是你的</li>
+        <li><span class="num">叁</span><strong>观点规律</strong> —— 没有观点就没有个人IP</li>
+        <li><span class="num">肆</span><strong>真实规律</strong> —— 一切的卡点，都与真实有关</li>
+        <li><span class="num">伍</span><strong>能量规律</strong> —— 最重要的资产是能量</li>
+      </ol>
+    </div>
+    <div class="col">
+      <h3 style="color:var(--accent)">3个系统</h3>
+      <ul class="bullet-list">
+        <li><strong>输入系统</strong>（flomo）—— 稳定的输入机制</li>
+        <li><strong>加工系统</strong>（Obsidian + AI）—— 第二大脑</li>
+        <li><strong>输出系统</strong>（Agent + 飞书）—— 高效高质量产出</li>
+      </ul>
+      <div class="highlight-bar" style="margin-top:20px; font-size:18px">
+        <em>你是不可替代的核心，<br/>AI 再强大也只是你的辅助。</em>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SLIDE 26: THANKS ====== -->
+<section class="slide thanks">
+  <span class="slide-num" style="color:rgba(250,249,246,0.3)">26 / 26</span>
+  <h1>谢谢。</h1>
+  <div class="sub">期待与你一起，用 AI 打造属于你自己的内容系统</div>
+  <div class="qr-note" style="margin-top:48px">
+    杨昱轩 · 北辰青年线下分享 · 2026.05.30
+  </div>
+</section>
+
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function updateSlide() {
+    const slide = slides[current];
+    slide.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('slideNav').textContent = `${current + 1} / ${slides.length}`;
+    document.getElementById('progressBar').style.width = `${((current + 1) / slides.length) * 100}%`;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      if (current < slides.length - 1) { current++; updateSlide(); }
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (current > 0) { current--; updateSlide(); }
+    }
+  });
+
+  // Touch swipe support
+  let touchStartY = 0;
+  document.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
+  document.addEventListener('touchend', e => {
+    const diff = touchStartY - e.changedTouches[0].clientY;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0 && current < slides.length - 1) { current++; updateSlide(); }
+      else if (diff < 0 && current > 0) { current--; updateSlide(); }
+    }
+  });
+
+  // Initialize
+  updateSlide();
+</script>
+</body>
+</html>

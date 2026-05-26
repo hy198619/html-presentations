@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>聊聊 Markdown 和 HTML · AI-101</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0a0b;
+    --ink-rgb:10,10,11;
+    --paper:#f1efea;
+    --paper-rgb:241,239,234;
+    --paper-tint:#e8e5de;
+    --ink-tint:#18181a;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+  #deck{position:fixed;inset:0;width:1000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.2em;text-transform:uppercase;opacity:.62}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:10vw;line-height:.96;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:6.2vw;line-height:1.08;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:3.1vw;line-height:1.25;letter-spacing:0;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.3vw;line-height:1.3}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.75vw;line-height:1.5;opacity:.86}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .big-num{font-family:var(--serif-en);font-weight:800;font-size:10vw;line-height:.85;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .mid-num{font-family:var(--serif-en);font-weight:700;font-size:5.5vw;line-height:.88;letter-spacing:-.02em;font-feature-settings:"tnum"}
+  .hi{position:relative;display:inline}
+  .slide.dark .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--paper-rgb),.15);z-index:-1}
+  .slide.light .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--ink-rgb),.08);z-index:-1}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .frame.grid-2-7-5,.frame.grid-2-6-6,.frame.grid-2-8-4,.frame.grid-3-3,.frame.grid-6{display:grid}
+  .grid-2-7-5{display:grid;grid-template-columns:7fr 5fr;gap:3vw 4vh;align-items:start}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .grid-2-8-4{display:grid;grid-template-columns:8fr 4fr;gap:3vw 4vh;align-items:start}
+  .grid-3-3{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(0,1fr);gap:2.4vh 2vw}
+  .grid-6{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:4vw 6vw;flex:1;align-content:center;padding:2vh 0}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:4vw;flex:1;align-content:center}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:4vh 6vw;flex:1;align-content:center}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .fill{flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .stat-card{display:flex;flex-direction:column;gap:.8vh;align-items:flex-start;padding-top:1.6vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.3)}
+  .stat-card .stat-label{font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.24em;text-transform:uppercase;opacity:.55}
+  .stat-card .stat-nb{font-family:var(--serif-en);font-weight:800;font-size:5.8vw;line-height:.9;letter-spacing:-.03em;font-feature-settings:"tnum";margin-top:.4vh}
+  .stat-card .stat-nb .stat-unit{font-family:var(--serif-zh);font-weight:500;font-size:.38em;letter-spacing:0;opacity:.72;margin-left:.14em}
+  .stat-card .stat-note{font-family:var(--sans-zh);font-weight:400;font-size:max(13px,1.05vw);line-height:1.5;opacity:.72;margin-top:.6vh}
+  .grid-4 .stat-card .stat-nb{font-size:5vw}
+  .grid-3 .stat-card .stat-nb{font-size:6.8vw}
+  .pipeline-section{margin-top:4.4vh;padding-top:2.8vh;border-top:1px dashed rgba(127,127,127,.32)}
+  .pipeline-section:first-of-type{border-top:0;padding-top:0;margin-top:3vh}
+  .pipeline-label{font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.24em;text-transform:uppercase;opacity:.62;margin-bottom:2.2vh}
+  .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:1.2vw}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.15vw;opacity:.45}
+  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.55vw;letter-spacing:.01em;line-height:1.2}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.95vw);line-height:1.45;opacity:.72}
+  .callout{padding:3vh 2.4vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.2vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .body-sm{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.15vw);line-height:1.7;opacity:.8}
+  .ico{width:1em;height:1em;display:inline-block;vertical-align:-.12em;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="left"]{transform:translateX(-24px)}
+  body.motion-ready [data-anim="right"]{transform:translateX(24px)}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.motion-ready [data-animate="pipeline"] [data-anim]{opacity:.15}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  @media(max-width:900px){.display{font-size:16vw}.display-zh{font-size:12vw}.h1-zh{font-size:7vw}.h-hero{font-size:14vw}.h-xl{font-size:9vw}.pipeline{grid-template-columns:repeat(2,1fr)}.grid-2-7-5,.grid-2-6-6,.grid-2-8-4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">← → 翻页 · B 静态 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ========== Slide 1: 封面 ========== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>AI-101 · 每天搞懂一件事</div>
+    <div>Vol. 24</div>
+  </div>
+  <div class="frame center" style="display:grid;gap:5vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>一次关于"输出格式"的调研与思考</div>
+    <h1 class="h-hero" style="font-size:8.5vw" data-anim>Markdown</h1>
+    <h1 class="h-hero" style="font-size:3.8vw;font-weight:500;opacity:.5" data-anim>&</h1>
+    <h1 class="h-hero" style="font-size:8.5vw" data-anim>HTML</h1>
+    <div class="meta-row" style="justify-content:center" data-anim>
+      <span>杨昱轩</span><span>·</span><span>2026.05</span>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">聊聊 Markdown 和 HTML</div>
+    <div>— 2026 —</div>
+  </div>
+</section>
+
+<!-- ========== Slide 2: Markdown 是什么 ========== -->
+<section class="slide light">
+  <div class="chrome">
+    <div>前情 · Context</div>
+    <div>01 / 10</div>
+  </div>
+  <div class="frame grid-2-7-5" style="padding-top:5vh">
+    <div style="display:flex;flex-direction:column;gap:3vh">
+      <div class="kicker" data-anim>前面的分享里提到过</div>
+      <h2 class="h-xl" data-anim>Markdown 是什么</h2>
+      <p class="lead" style="margin-top:2vh" data-anim>
+        带格式的纯文本。几个符号搞定标题、加粗、列表。Obsidian 笔记、飞书编辑语法，底层都是它。
+      </p>
+      <p class="body-sm" data-anim style="margin-top:1vh">
+        AI 也很喜欢 Markdown ——读取编辑都方便，文件特别小。
+      </p>
+      <div class="callout" data-anim style="margin-top:auto">
+        "人写文档时，手敲方便的格式。"
+        <div class="cite">— Markdown 的核心优势</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;gap:3vh;padding-top:8vh">
+      <div style="font-family:var(--mono);font-size:max(13px,1vw);opacity:.5;line-height:2.2" data-anim>
+        # 标题<br>
+        <span style="opacity:.3">## 二级标题</span><br>
+        **加粗文字**<br>
+        - 列表项 1<br>
+        - 列表项 2<br>
+        <span style="opacity:.3">[链接](url)</span><br>
+        `代码块`
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 01 · Markdown 简介</div>
+    <div>带格式的纯文本</div>
+  </div>
+</section>
+
+<!-- ========== Slide 3: 问题 ========== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>问题 · The Problem</div>
+    <div>02 / 10</div>
+  </div>
+  <div class="frame center" style="display:grid;gap:6vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>BUT</div>
+    <h2 class="h-xl" style="font-size:5.5vw" data-anim>格式太单调了</h2>
+    <p class="lead" style="max-width:58vw;text-align:center" data-anim>
+      满屏 <span style="font-family:var(--mono);opacity:1">#</span>、<span style="font-family:var(--mono);opacity:1">-</span>、<span style="font-family:var(--mono);opacity:1">**加粗**</span>——<br>
+      对阅读来说其实不太友好。
+    </p>
+    <div style="display:flex;gap:4vw;justify-content:center;margin-top:2vh">
+      <div class="stat-card" style="flex:1;max-width:22vw;border-color:rgba(var(--paper-rgb),.2)" data-anim>
+        <div class="stat-label">100 行以上</div>
+        <div class="stat-nb" style="font-size:3.5vw">😵</div>
+        <div class="stat-note">纯文本根本读不完</div>
+      </div>
+      <div class="stat-card" style="flex:1;max-width:22vw;border-color:rgba(var(--paper-rgb),.2)" data-anim>
+        <div class="stat-label">发给同事</div>
+        <div class="stat-nb" style="font-size:3.5vw">📎</div>
+        <div class="stat-note">打不开 / 一堆符号</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 02 · Markdown 的问题</div>
+    <div>格式单调 · 阅读不友好</div>
+  </div>
+</section>
+
+<!-- ========== Slide 4: Thariq 的数据 ========== -->
+<section class="slide hero light">
+  <div class="chrome">
+    <div>数据来源 · X / Twitter</div>
+    <div>03 / 10</div>
+  </div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker" data-anim>一条推文</div>
+    <h2 class="h-xl" data-anim>「HTML 不合理地有效」</h2>
+    <p class="lead" style="margin:1.5vh 0 1vh" data-anim>
+      Claude Code 团队的 Thariq 写的长文。
+    </p>
+    <div class="grid-3" style="margin-top:6vh">
+      <div class="stat" data-anim>
+        <div class="m">Likes</div>
+        <div class="n">15K</div>
+        <div class="l">15,000 个赞</div>
+      </div>
+      <div class="stat" data-anim>
+        <div class="m">Bookmarks</div>
+        <div class="n">31K</div>
+        <div class="l">31,000 个收藏</div>
+      </div>
+      <div class="stat" data-anim>
+        <div class="m">Views</div>
+        <div class="n">11.6M</div>
+        <div class="l">1160 万次浏览</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:auto" data-anim>
+      "一个程序员聊文件格式，能拿到这个数据——<br>
+      很多人心里已经有感觉了，只是没人说得这么清楚。"
+      <div class="cite">— 我的第一印象</div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 03 · Thariq 的推文</div>
+    <div>15K 赞 · 31K 收藏 · 1160 万浏览</div>
+  </div>
+</section>
+
+<!-- ========== Slide 5: 核心观点 - 人在写 vs AI在写 ========== -->
+<section class="slide dark" data-animate="directional">
+  <div class="chrome">
+    <div>核心观点 · The Shift</div>
+    <div>04 / 10</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>Thariq 的洞察</div>
+    <h2 class="h-xl" data-anim style="margin-bottom:4vh">Markdown 的黄金时代正在过去</h2>
+    <div class="grid-2-6-6" style="gap:5vw 4vh">
+      <div data-anim="left" style="padding:3vh 2vw;border-left:3px solid currentColor;opacity:.55">
+        <div class="kicker" style="opacity:.9">Before · 人在写</div>
+        <h3 class="h-md" style="margin-top:2vh">手敲方便的格式</h3>
+        <ul style="margin-top:3vh;padding-left:1.2em;display:flex;flex-direction:column;gap:1.4vh;font-family:var(--sans-zh);font-size:max(14px,1.1vw);line-height:1.55">
+          <li>人自己写文档、做笔记</li>
+          <li>几个符号就能搞定排版</li>
+          <li>纯文本好编辑、好迁移</li>
+        </ul>
+      </div>
+      <div data-anim="right" style="padding:3vh 2vw;border-left:3px solid currentColor">
+        <div class="kicker" style="opacity:.9">After · AI 在写</div>
+        <h3 class="h-md" style="margin-top:2vh">不再需要手敲了</h3>
+        <ul style="margin-top:3vh;padding-left:1.2em;display:flex;flex-direction:column;gap:1.4vh;font-family:var(--sans-zh);font-size:max(14px,1.1vw);line-height:1.55">
+          <li>告诉 AI 你要什么，AI 帮你写</li>
+          <li>Markdown 最大的优势不存在了</li>
+          <li><span class="hi">格式只是容器，不是门槛</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 04 · 范式转变</div>
+    <div>人在写 → AI 在写</div>
+  </div>
+</section>
+
+<!-- ========== Slide 6: HTML 四个好处 (Pipeline) ========== -->
+<section class="slide light" data-animate="pipeline">
+  <div class="chrome">
+    <div>HTML 的优势 · Four Benefits</div>
+    <div>05 / 10</div>
+  </div>
+  <div class="frame">
+    <div class="kicker" data-anim>让 AI 输出 HTML，四个你马上能感受到的好处</div>
+    <h2 class="h-xl">不只是排版</h2>
+    <div class="pipeline" data-cols="4" style="margin-top:5vh">
+      <div class="step" data-anim="step">
+        <div class="step-nb">01</div>
+        <div class="step-title">信息密度</div>
+        <div class="step-desc">颜色 / 图表 / 流程图 / 标签页 / 时间线 / 幻灯片——Markdown 用文字描述照片，HTML 直接把照片给你看</div>
+      </div>
+      <div class="step" data-anim="step">
+        <div class="step-nb">02</div>
+        <div class="step-title">可读性</div>
+        <div class="step-desc">视觉分层：用颜色区分优先级，标签页分模块，图表代替大段文字</div>
+      </div>
+      <div class="step" data-anim="step">
+        <div class="step-nb">03</div>
+        <div class="step-title">分享</div>
+        <div class="step-desc">双击即开，上传生成链接，手机电脑都能看——不需要对方装任何软件</div>
+      </div>
+      <div class="step" data-anim="step">
+        <div class="step-nb">04</div>
+        <div class="step-title">交互</div>
+        <div class="step-desc">滑块 / 按钮 / 选项——文档从"只读"变成"可操作"，最让人兴奋的一点</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 05 · HTML 的优势</div>
+    <div>按 → 逐一步进</div>
+  </div>
+</section>
+
+<!-- ========== Slide 7: 社区声音 ========== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>社区声音 · Community</div>
+    <div>06 / 10</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>让 agent 做了一轮调研</div>
+    <h2 class="h-xl" data-anim>社区里主要有三种看法</h2>
+    <div class="grid-3" style="margin-top:5vh">
+      <div data-anim style="display:flex;flex-direction:column;gap:2vh;padding:3vh 0;border-top:1px solid rgba(var(--paper-rgb),.2)">
+        <div class="meta" style="opacity:.8">Simon Willison</div>
+        <div class="h-md" style="font-size:1.8vw">HTML 被严重低估</div>
+        <p class="body-sm" style="margin-top:1vh">
+          浏览器是"万能渲染器"，AI 生成的 HTML 可以直接变成交互工具。
+        </p>
+      </div>
+      <div data-anim style="display:flex;flex-direction:column;gap:2vh;padding:3vh 0;border-top:1px solid rgba(var(--paper-rgb),.2)">
+        <div class="meta" style="opacity:.8">Amjad Masad · Replit CEO</div>
+        <div class="h-md" style="font-size:1.8vw">自然语言 → 可运行网页</div>
+        <p class="body-sm" style="margin-top:1vh">
+          Markdown 适合存文档，HTML 才是 AI 交付产品的终点格式。
+        </p>
+      </div>
+      <div data-anim style="display:flex;flex-direction:column;gap:2vh;padding:3vh 0;border-top:1px solid rgba(var(--paper-rgb),.2)">
+        <div class="meta" style="opacity:.8">Obsidian / Notion 社区</div>
+        <div class="h-md" style="font-size:1.8vw">知识库还是 Markdown 更好</div>
+        <p class="body-sm" style="margin-top:1vh">
+          纯文本好搜索、好迁移、版本管理方便，插件生态成熟。
+        </p>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:auto" data-anim>
+      两边说的其实不是一个层面的问题。<br>
+      支持 HTML 的人讲"输出的东西怎么给别人看"，<br>
+      坚持 Markdown 的人讲"自己写的东西怎么长期存"。
+      <div class="cite">— 我的判断</div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 06 · 三种声音</div>
+    <div>不是替代，是分工</div>
+  </div>
+</section>
+
+<!-- ========== Slide 8: 我的区分 ========== -->
+<section class="slide light" data-animate="directional">
+  <div class="chrome">
+    <div>我的区分 · My Take</div>
+    <div>07 / 10</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>我自己琢磨的区分</div>
+    <h2 class="h-xl" data-anim style="margin-bottom:5vh">存 vs 输出，是两件事</h2>
+    <div class="grid-2-6-6" style="gap:5vw 4vh">
+      <div data-anim="left" style="padding:4vh 3vw;border-left:3px solid currentColor;opacity:.6">
+        <div class="kicker" style="opacity:.9">存给自己看</div>
+        <h3 class="h-md" style="margin-top:2vh;font-size:2.8vw">→ Markdown</h3>
+        <ul style="margin-top:3vh;padding-left:1.2em;display:flex;flex-direction:column;gap:1.4vh;font-family:var(--sans-zh);font-size:max(14px,1.1vw);line-height:1.55">
+          <li>笔记、知识库、个人想法</li>
+          <li>纯文本好搜索</li>
+          <li>不怕工具换代</li>
+        </ul>
+      </div>
+      <div data-anim="right" style="padding:4vh 3vw;border-left:3px solid currentColor">
+        <div class="kicker" style="opacity:.9">要给别人看</div>
+        <h3 class="h-md" style="margin-top:2vh;font-size:2.8vw">→ HTML</h3>
+        <ul style="margin-top:3vh;padding-left:1.2em;display:flex;flex-direction:column;gap:1.4vh;font-family:var(--sans-zh);font-size:max(14px,1.1vw);line-height:1.55">
+          <li>方案、报告、调研结果</li>
+          <li>浏览器打开就能看</li>
+          <li>手机上也正常显示</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:4vh" data-anim>
+      你不需要学任何 HTML 知识。<br>
+      直接告诉 AI："帮我生成一个 HTML 文件"就行。<br>
+      难点不在于语法，而在于你想清楚——<span class="hi">这个文件要做什么、给谁看</span>。
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 07 · 存 vs 输出</div>
+    <div>Markdown 是草稿本，HTML 是展示台</div>
+  </div>
+</section>
+
+<!-- ========== Slide 9: 最后 ========== -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>最后 · Closing</div>
+    <div>08 / 10</div>
+  </div>
+  <div class="frame center" style="display:grid;gap:6vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>In closing</div>
+    <h2 class="h-xl" style="font-size:4.8vw" data-anim>
+      在 AI 之前，我们没得选——<br>
+      自己写 HTML 太麻烦了。
+    </h2>
+    <p class="lead" style="max-width:55vw;text-align:center;opacity:.7" data-anim>
+      现在 AI 能写，而且写得很好。<br>
+      不是说以后什么都要用 HTML。
+    </p>
+    <div class="callout" style="max-width:65vw;text-align:center;margin:0 auto;border-left:none;padding:4vh 3vw;background:rgba(var(--paper-rgb),.08)" data-anim>
+      <div class="q-big" style="font-size:max(18px,1.8vw)">
+        下次让 AI 干活的时候，想一想：<br>
+        <span class="hi">这个活儿最终是给谁看的？</span><br>
+        如果是给别人看的，不妨试试让 AI 输出 HTML。
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Page 08 · 最后</div>
+    <div>格式不是小事</div>
+  </div>
+</section>
+
+<!-- ========== Slide 10: 结尾金句 ========== -->
+<section class="slide hero dark">
+  <div class="chrome">
+    <div>AI-101 · 每天搞懂一件事</div>
+    <div>09 / 10</div>
+  </div>
+  <div class="frame center" style="display:grid;gap:6vh;align-content:center;min-height:80vh">
+    <div class="kicker" data-anim>The Takeaway</div>
+    <blockquote data-animate="quote" style="font-family:var(--serif-zh);font-weight:700;font-size:5.5vw;line-height:1.15;letter-spacing:-.005em;max-width:68vw">
+      <span data-anim="line" style="display:block">格式不是小事。</span>
+      <span data-anim="line" style="display:block">格式决定了信息</span>
+      <span data-anim="line" style="display:block">能不能被有效地传递。</span>
+    </blockquote>
+    <div class="meta-row" style="justify-content:center" data-anim>
+      <span>好，今天的分享大致就是这些</span><span>·</span><span>欢迎聊聊 👇</span>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="title">AI-101 社群 · 杨昱轩</div>
+    <div>— 谢谢 —</div>
+  </div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+const VS=`attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+const FS_DARK=`precision highp float;uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;float md=length(p-m);float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;vec2 p0=p;for(float i=1.0;i<4.0;i++){p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;}float r=length(p);float ang=atan(p.y,p.x);vec3 a=vec3(0.12,0.12,0.13);vec3 b=vec3(0.03,0.04,0.05);vec3 c=vec3(1.0,1.0,1.0);vec3 d=vec3(0.1,0.2,0.4);vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;col+=vec3(disp*0.015,disp*0.01,disp*0.02);float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);col+=hi*0.08;vec3 base=vec3(0.05,0.05,0.06);col=mix(base,col,0.85);gl_FragColor=vec4(col,1.0);}`;
+const FS_LIGHT=`precision highp float;uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}float noise(vec2 p){vec2 i=floor(p),f=fract(p);float a=hash(i),b=hash(i+vec2(1,0));float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));vec2 u=f*f*(3.0-2.0*f);return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;}float fbm(vec2 p){float v=0.0,a=0.5;mat2 m=mat2(0.80,0.60,-0.60,0.80);for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}return v;}void main(){vec2 uv=gl_FragCoord.xy/u_resolution.xy;vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;vec2 md=p-m;float dl=length(md);p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));float f=fbm(p*2.2+r*1.5);vec3 silverDark=vec3(0.86,0.85,0.84);vec3 paper=vec3(0.955,0.945,0.925);vec3 col=mix(silverDark,paper,f);float ph=r.x*2.2+u_time*0.35;col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;float hl=smoothstep(0.48,0.92,f);col+=hl*0.06;gl_FragColor=vec4(col,1.0);}`;
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+function bootGL(id,fs){const c=document.getElementById(id);const gl=c.getContext('webgl',{alpha:false});if(!gl)return()=>false;const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,VS));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);gl.useProgram(p);const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);const a=gl.getAttribLocation(p,'position');gl.enableVertexAttribArray(a);gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);const lR=gl.getUniformLocation(p,'u_resolution'),lT=gl.getUniformLocation(p,'u_time'),lM=gl.getUniformLocation(p,'u_mouse');const rz=()=>{const d=Math.min(devicePixelRatio||1,2);c.width=innerWidth*d;c.height=innerHeight*d;gl.viewport(0,0,c.width,c.height)};addEventListener('resize',rz);rz();return(t)=>{gl.uniform2f(lR,c.width,c.height);gl.uniform1f(lT,t);gl.uniform2f(lM,mouse.x,1-mouse.y);gl.drawArrays(gl.TRIANGLES,0,6);return true}}
+let dD=null,dL=null,raf=0,t0=Date.now();
+function sGL(){if(window.__lp||raf)return;if(!dD)dD=bootGL('bg-dark',FS_DARK);if(!dL)dL=bootGL('bg-light',FS_LIGHT);t0=Date.now();function l(){if(window.__lp){raf=0;return}dD((Date.now()-t0)/1000);dL((Date.now()-t0)/1000);raf=requestAnimationFrame(l)}raf=requestAnimationFrame(l)}
+function xGL(){if(raf)cancelAnimationFrame(raf);raf=0}
+addEventListener('DOMContentLoaded',()=>{sGL()});
+addEventListener('ppt-lp',e=>{e.detail.on?xGL():sGL()});
+const dk=document.getElementById('deck'),sl=dk.querySelectorAll('.slide'),nv=document.getElementById('nav');
+let ix=0,tt=sl.length,lock=false;
+dk.style.width=(tt*100)+'vw';
+sl.forEach((s,i)=>{const b=document.createElement('button');b.className='dot';b.dataset.i=i;b.onclick=()=>go(i);nv.appendChild(b)});
+function go(n){if(lock)return;ix=Math.max(0,Math.min(tt-1,n));dk.style.transform=`translateX(${-ix*100}vw)`;nv.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===ix));const el=sl[ix],th=el.dataset.theme||(el.classList.contains('light')?'light':'dark');document.body.classList.toggle('light-bg',th==='light');if(window.__ps)setTimeout(()=>window.__ps(ix),450);lock=true;setTimeout(()=>lock=false,700)}
+let ovOn=false,ov=document.createElement('div');ov.id='overview';ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';document.body.appendChild(ov);
+function buildOv(){ov.innerHTML='';const g=document.createElement('div');g.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';sl.forEach((s,i)=>{const c=document.createElement('div');c.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+((i===ix)?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';const w=document.createElement('div');w.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');const cl=s.cloneNode(true);cl.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';w.appendChild(cl);const lb=document.createElement('div');lb.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';lb.textContent=(i+1)+' / '+tt;c.appendChild(w);c.appendChild(lb);c.onclick=()=>{togOv();go(i)};g.appendChild(c)});ov.appendChild(g)}
+function togOv(){ovOn=!ovOn;if(ovOn){buildOv();ov.style.display='block'}else ov.style.display='none'}
+addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();togOv();return}if(e.key&&e.key.toLowerCase()==='b'&&!e.metaKey&&!e.ctrlKey&&!e.altKey){e.preventDefault();window.__setLp&&window.__setLp(!window.__lp);return}if(ovOn)return;if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){if(window.__pa&&window.__pa())return;go(ix+1);return}if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(ix-1);if(e.key==='Home')go(0);if(e.key==='End')go(tt-1)});
+let wTO=null,wAcc=0;addEventListener('wheel',e=>{wAcc+=e.deltaY+e.deltaX;if(Math.abs(wAcc)>50){if(wAcc>0&&window.__pa&&window.__pa()){wAcc=0}else{go(ix+(wAcc>0?1:-1));wAcc=0}}clearTimeout(wTO);wTO=setTimeout(()=>wAcc=0,150)},{passive:true});
+let tx=0,ty=0;addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});addEventListener('touchend',e=>{const dx=(e.changedTouches[0].clientX-tx);if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(e.changedTouches[0].clientY-ty)){if(dx<0&&window.__pa&&window.__pa())return;go(ix+(dx<0?1:-1))}},{passive:true});
+go(0);
+</script>
+<script type="module">
+let m;try{m=await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm')}catch(e){console.warn('[motion] CDN failed',e);document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'});document.querySelectorAll('[data-animate="pipeline"] [data-anim]').forEach(el=>el.style.opacity='1')}
+if(m){const{animate,stagger}=m;document.body.classList.add('motion-ready');const E=[.22,1,.36,1],slides=[...document.querySelectorAll('.slide')];let pS=-1,lI=-1;
+function rA(s){s.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='';el.style.transform=''})}
+function rS(s){rA(s);document.getAnimations?.().forEach(a=>a.cancel());s.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'})}
+window.__ps=function(i){const s=slides[i];if(!s)return;lI=i;const rc=s.dataset.animate||(s.classList.contains('hero')?'hero':'cascade');if(window.__lp){rS(s);return}if(rc==='pipeline'){pS=-1;s.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='0.15';el.style.transform='none'});return}rA(s);const all=[...s.querySelectorAll('[data-anim]')];if(!all.length)return;if(rc==='directional'){const l=all.filter(e=>e.dataset.anim==='left'),d=all.filter(e=>e.dataset.anim==='divider'),r=all.filter(e=>e.dataset.anim==='right'),o=all.filter(e=>!['left','right','divider'].includes(e.dataset.anim));if(o.length)animate(o,{opacity:[0,1],y:[12,0]},{duration:.6,delay:stagger(.1,{start:.15}),easing:E});if(l.length)animate(l,{opacity:[0,1],x:[-24,0]},{duration:.8,delay:.35,easing:E});if(d.length)animate(d,{opacity:[0,.25]},{duration:.5,delay:.9});if(r.length)animate(r,{opacity:[0,1],x:[24,0]},{duration:.8,delay:1,easing:E});return}if(rc==='quote'){const ln=all.filter(e=>e.dataset.anim==='line'),o=all.filter(e=>e.dataset.anim!=='line');if(o.length)animate(o,{opacity:[0,1],y:[8,0]},{duration:.6,delay:stagger(.12,{start:.2}),easing:E});if(ln.length)animate(ln,{opacity:[.35,1],y:[10,0]},{duration:.8,delay:stagger(.55,{start:.5}),easing:E});return}if(rc==='hero'){animate(all,{opacity:[0,1],y:[14,0]},{duration:.9,delay:stagger(.16,{start:.2}),easing:E});return}animate(all,{opacity:[0,1],y:[16,0]},{duration:.75,delay:stagger(.1,{start:.15}),easing:E})};
+window.__pa=function(){if(window.__lp)return false;const s=slides[lI];if(!s||s.dataset.animate!=='pipeline')return false;const st=[...s.querySelectorAll('[data-anim="step"]')];if(pS>=st.length-1)return false;pS++;animate(st[pS],{opacity:[.15,1],y:[8,0]},{duration:.5,easing:E});return true};
+window.__ps(0)}
+</script>
+</body>
+</html>

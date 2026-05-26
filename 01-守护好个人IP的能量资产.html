@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>守护好个人IP的能量资产 · 老杨</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0a0b;--ink-rgb:10,10,11;--paper:#f1efea;--paper-rgb:241,239,234;--paper-tint:#e8e5de;--ink-tint:#18181a;
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}body.light-bg canvas#bg-dark{opacity:0}
+  body.low-power canvas.bg{display:none!important}
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink);background:var(--paper)}
+  .slide.dark{color:var(--paper);background:var(--ink)}
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .chrome .left,.chrome .right{display:flex;gap:2.4em;align-items:center}
+  .chrome .sep{width:40px;height:1px;background:currentColor;opacity:.4}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;padding:6px 14px;border:1px solid currentColor;opacity:.85}
+  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin:3vh 0}
+  .rule.v{width:1px;height:100%;margin:0}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .display{font-family:var(--serif-en);font-weight:700;font-size:11vw;line-height:.92;letter-spacing:-.025em}
+  .display-zh{font-family:var(--serif-zh);font-weight:700;font-size:7.8vw;line-height:1.04;letter-spacing:-.005em}
+  .h1-zh{font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.12;letter-spacing:-.005em}
+  .h2-zh{font-family:var(--serif-zh);font-weight:600;font-size:3.2vw;line-height:1.2;letter-spacing:0}
+  .h3-zh{font-family:var(--serif-zh);font-weight:500;font-size:1.9vw;line-height:1.35}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.22vw);line-height:1.75;opacity:.82;letter-spacing:.01em}
+  .body-serif{font-family:var(--serif-zh);font-weight:400;font-size:max(15px,1.3vw);line-height:1.65;opacity:.88}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.9vw;line-height:1.4;opacity:.85}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .big-num{font-family:var(--serif-en);font-weight:800;font-size:10vw;line-height:.85;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .mid-num{font-family:var(--serif-en);font-weight:700;font-size:5.5vw;line-height:.88;letter-spacing:-.02em;font-feature-settings:"tnum"}
+  .ghost{font-family:var(--serif-en);font-weight:900;font-size:34vw;line-height:.8;opacity:.06;letter-spacing:-.04em;position:absolute;font-feature-settings:"tnum"}
+  em{font-style:italic;font-family:var(--serif-en)}
+  .en{font-family:var(--serif-en);font-style:italic;font-weight:500}
+  .col{display:flex;flex-direction:column;gap:2.4vh}
+  .row{display:flex;align-items:center;gap:3vw}
+  .grid-6{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:4vw 6vw;flex:1;align-content:center;padding:2vh 0}
+  .grid-9{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3vh 4vw;flex:1;align-content:center}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:4vh 6vw;flex:1;align-content:center}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:4vw;flex:1;align-content:center}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .split-55{display:grid;grid-template-columns:55fr 45fr;gap:5vw;flex:1;align-items:stretch}
+  .fill{flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .bottom-left{position:absolute;left:6vw;bottom:9vh;max-width:50vw}
+  .bottom-right{position:absolute;right:6vw;bottom:9vh;max-width:50vw;text-align:right}
+  .top-right{position:absolute;right:6vw;top:6vh;text-align:right}
+  .stat{display:flex;flex-direction:column;gap:1vh;align-items:flex-start}
+  .stat .n{font-family:var(--serif-en);font-weight:800;font-size:8vw;line-height:.88;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .stat .l{font-family:var(--sans-zh);font-size:max(13px,1.05vw);opacity:.7;margin-top:1vh;font-weight:400;line-height:1.5}
+  .stat .m{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;margin-bottom:.2vh}
+  .callout{padding:3vh 2.4vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.2vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.6vw);line-height:1.42}
+  .plat{display:flex;flex-direction:column;justify-content:flex-end;padding:2vh 0;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .plat .name{font-family:var(--serif-zh);font-weight:700;font-size:1.8vw;margin-bottom:.6vh}
+  .plat .nb{font-family:var(--serif-en);font-weight:700;font-size:3.2vw;letter-spacing:-.02em;line-height:1;font-feature-settings:"tnum"}
+  .plat .sub{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.55;margin-top:.6vh}
+  .plat .fill{font-family:var(--sans-zh);font-weight:300;font-size:2.4vw;opacity:.28;letter-spacing:-.01em;line-height:1}
+  .rowline{display:grid;grid-template-columns:1fr 2fr 1fr;gap:2vw;padding:2.2vh 0;border-top:1px solid currentColor;align-items:center;border-color:rgba(127,127,127,.25)}
+  .rowline:last-child{border-bottom:1px solid currentColor;border-color:rgba(127,127,127,.25)}
+  .rowline .k{font-family:var(--serif-zh);font-weight:700;font-size:1.7vw}
+  .rowline .v{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.2vw);opacity:.85;line-height:1.55}
+  .rowline .m{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;justify-self:end}
+  .pillar{display:flex;flex-direction:column;gap:1.8vh}
+  .pillar .ic{font-family:var(--serif-en);font-style:italic;font-size:2.6vw;opacity:.45;font-weight:400}
+  .pillar .ic svg{width:2.8vw;height:2.8vw;stroke-width:1.2;opacity:.7}
+  .pillar .t{font-family:var(--serif-zh);font-weight:700;font-size:2.4vw;line-height:1.1}
+  .pillar .d{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.1vw);opacity:.76;line-height:1.6}
+  .sign{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:2vw;opacity:.7}
+  .hi{position:relative;display:inline}
+  .slide.dark .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--paper-rgb),.15);z-index:-1}
+  .slide.light .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--ink-rgb),.08);z-index:-1}
+  .ico{width:1em;height:1em;display:inline-block;vertical-align:-.12em;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .ico-lg,.ico-md,.ico-sm{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+  .ico-lg{width:2.6vw;height:2.6vw;stroke-width:1.2;display:inline-block}
+  .ico-md{width:1.8vw;height:1.8vw;stroke-width:1.3;display:inline-block;vertical-align:-.4em}
+  .ico-sm{width:1.1vw;height:1.1vw;stroke-width:1.4;display:inline-block;vertical-align:-.15em;opacity:.7}
+  .img-slot{border:1.5px dashed rgba(127,127,127,.4);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1vh;padding:2vh 2vw;font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;opacity:.55;position:relative;aspect-ratio:16/9;width:100%;max-height:56vh;margin-inline:auto;box-sizing:border-box}
+  .img-slot::before{content:"";position:absolute;inset:8px;border:1px solid currentColor;opacity:.2}
+  .img-slot .plus{font-size:2vw;font-weight:300;opacity:.5;letter-spacing:0}
+  .img-slot .label{position:relative;z-index:2;text-align:center}
+  .img-slot.r-4x3{aspect-ratio:4/3}.img-slot.r-3x2{aspect-ratio:3/2}.img-slot.r-1x1{aspect-ratio:1/1}
+  .frame-img{overflow:hidden;position:relative;background:rgba(0,0,0,.04);box-sizing:border-box;width:100%;border-radius:4px}
+  .slide.dark .frame-img{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+  .frame-img>img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .frame-img.fit-contain>img{object-fit:contain;object-position:center center}
+  .frame-img.r-16x9{aspect-ratio:16/9;max-height:64vh}.frame-img.r-16x10{aspect-ratio:16/10;max-height:56vh}
+  .frame-img.r-4x3{aspect-ratio:4/3;max-height:56vh}.frame-img.r-3x2{aspect-ratio:3/2;max-height:46vh}
+  .frame-img.r-3x4{aspect-ratio:3/4;max-height:60vh}.frame-img.r-1x1{aspect-ratio:1/1;max-height:50vh}
+  .frame-img.h-16{height:16vh}.frame-img.h-18{height:18vh}.frame-img.h-22{height:22vh}.frame-img.h-26{height:26vh}.frame-img.h-28{height:28vh}
+  .frame-cap{display:flex;justify-content:space-between;align-items:baseline;gap:1vw;margin-top:.8vh;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.72}
+  .frame-cap .pf{font-family:var(--serif-zh);font-weight:600;font-size:max(13px,1vw);letter-spacing:.04em;text-transform:none;opacity:.94}
+  .frame-cap .nb{font-family:var(--serif-en);font-style:italic;font-size:max(15px,1.2vw);letter-spacing:.02em;text-transform:none;opacity:.88}
+  .frame-cap .idx{font-family:var(--mono);opacity:.5}
+  figure.tile{display:flex;flex-direction:column;margin:0;min-width:0}
+  figure.tile>.frame-img{flex:0 0 auto}
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+  body.low-power #hint{opacity:.72;color:var(--paper);mix-blend-mode:normal}
+  body.light-bg.low-power #hint{color:var(--ink)}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .frame.grid-2-7-5,.frame.grid-2-6-6,.frame.grid-2-8-4,.frame.grid-3-3,.frame.grid-6{display:grid}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:10vw;line-height:.96;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:6.2vw;line-height:1.08;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:3.1vw;line-height:1.25;letter-spacing:0;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.3vw;line-height:1.3}
+  .h-hero-en,.h-xl-en{font-family:var(--serif-en);letter-spacing:-.025em}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.75vw;line-height:1.5;opacity:.86}
+  .meta-row{display:flex;gap:1.2em;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .stat-card{display:flex;flex-direction:column;gap:.8vh;align-items:flex-start;padding-top:1.6vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.3)}
+  .stat-card .stat-label{font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.24em;text-transform:uppercase;opacity:.55}
+  .stat-card .stat-nb{font-family:var(--serif-en);font-weight:800;font-size:5.8vw;line-height:.9;letter-spacing:-.03em;font-feature-settings:"tnum";margin-top:.4vh}
+  .stat-card .stat-nb .stat-unit{font-family:var(--serif-zh);font-weight:500;font-size:.38em;letter-spacing:0;opacity:.72;margin-left:.14em}
+  .stat-card .stat-note{font-family:var(--sans-zh);font-weight:400;font-size:max(13px,1.05vw);line-height:1.5;opacity:.72;margin-top:.6vh}
+  .grid-4 .stat-card .stat-nb{font-size:5vw}
+  .grid-3 .stat-card .stat-nb{font-size:6.8vw}
+  .pipeline-section{margin-top:4.4vh;padding-top:2.8vh;border-top:1px dashed rgba(127,127,127,.32)}
+  .pipeline-section:first-of-type{border-top:0;padding-top:0;margin-top:3vh}
+  .pipeline-label{font-family:var(--mono);font-size:max(11px,.85vw);letter-spacing:.24em;text-transform:uppercase;opacity:.62;margin-bottom:2.2vh}
+  .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:1.2vw}
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="6"]{grid-template-columns:repeat(6,1fr)}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.15vw;opacity:.45}
+  .step-title{font-family:var(--sans-zh);font-weight:700;font-size:1.55vw;letter-spacing:.01em;line-height:1.2}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.95vw);line-height:1.45;opacity:.72}
+  .grid-2-7-5{display:grid;grid-template-columns:7fr 5fr;gap:3vw 4vh;align-items:start}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .grid-2-8-4{display:grid;grid-template-columns:8fr 4fr;gap:3vw 4vh;align-items:start}
+  .grid-3-3{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:minmax(0,1fr);gap:2.4vh 2vw}
+  figure.frame-img{margin:0;display:flex;flex-direction:column;min-width:0}
+  .img-cap{display:block;margin-top:.8vh;font-family:var(--mono);font-size:max(10px,.8vw);letter-spacing:.22em;text-transform:uppercase;opacity:.6}
+  .callout-src{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .chrome{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.2em;text-transform:uppercase;opacity:.62}
+  .foot{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+  [data-anim]{opacity:1}
+  body.motion-ready [data-anim]{opacity:0}
+  body.motion-ready [data-anim="left"]{transform:translateX(-24px)}
+  body.motion-ready [data-anim="right"]{transform:translateX(24px)}
+  body.motion-ready [data-anim="line"]{opacity:0;transform:translateY(10px)}
+  body.motion-ready [data-animate="pipeline"] [data-anim]{opacity:.15}
+  body.low-power #deck{transition:none!important}
+  body.low-power *,body.low-power *::before,body.low-power *::after{animation:none!important;transition:none!important}
+  body.low-power.motion-ready [data-anim],body.low-power [data-anim]{opacity:1!important;transform:none!important}
+  @media (max-width:900px){.display{font-size:16vw}.display-zh{font-size:12vw}.h1-zh{font-size:7vw}.h-hero{font-size:14vw}.h-xl{font-size:9vw}.pipeline{grid-template-columns:repeat(2,1fr)}.grid-2-7-5,.grid-2-6-6,.grid-2-8-4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<script>
+  (function(){const KEY='guizang-ppt-low-power';const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;const stored=localStorage.getItem(KEY);window.__lowPowerMode=stored==='1'||(stored===null&&reduced);function updateHint(){const hint=document.getElementById('hint');if(hint)hint.textContent=`← → 翻页 · B ${window.__lowPowerMode?'动态':'静态'} · ESC 索引`}window.__setLowPowerMode=function(on,opts={}){window.__lowPowerMode=!!on;document.body.classList.toggle('low-power',window.__lowPowerMode);if(opts.persist!==false)localStorage.setItem(KEY,window.__lowPowerMode?'1':'0');if(window.__lowPowerMode&&document.getAnimations){document.getAnimations().forEach(a=>a.cancel())}updateHint();dispatchEvent(new CustomEvent('ppt-low-power-change',{detail:{on:window.__lowPowerMode}}));if(window.__playSlide)window.__playSlide(window.__currentSlideIndex||0)};document.body.classList.toggle('low-power',window.__lowPowerMode);addEventListener('DOMContentLoaded',updateHint,{once:true})})();
+</script>
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">← → 翻页 · B 静态 · ESC 索引</div>
+<div id="deck">
+
+<!-- ========== SLIDE 1 · 封面 ========== -->
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome"><div class="left"><span>Vol.01</span><span class="sep"></span><span>能量资产</span></div><div class="right"><span>小鹅通杭州线下分享</span></div></div>
+  <div class="frame" style="justify-content:center">
+    <div data-anim>
+      <div class="kicker">重构全域 IP 增长路径 —— 从流量到资产</div>
+    </div>
+    <div data-anim>
+      <div class="h-hero">守护好个人IP的</div>
+      <div class="h-hero" style="color:#e8b84b">能量资产</div>
+    </div>
+    <div data-anim>
+      <div class="h-sub" style="margin-top:3vh">你就是你的全部生产资料</div>
+    </div>
+    <div class="rule" style="margin:4vh 0" data-anim></div>
+    <div data-anim>
+      <div class="meta-row">
+        <span>2026.05.24 · 杭州</span>
+        <span>·</span>
+        <span>老杨</span>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>01 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 2 · 自我介绍 ========== -->
+<section class="slide light" data-animate="cascade">
+  <div class="chrome"><div class="left"><span>About</span><span class="sep"></span><span>关于分享者</span></div><div class="right"><span>Introduction</span></div></div>
+  <div class="frame">
+    <div class="kicker" data-anim>大家好，叫我老杨就好</div>
+    <div data-anim>
+      <div class="h-xl" style="margin-bottom:4vh">15年内容人 → 个人IP教练</div>
+    </div>
+    <div class="grid-3" style="flex:1;align-content:start" data-anim>
+      <div class="stat-card">
+        <div class="stat-label">从业经验</div>
+        <div class="stat-nb">15<span class="stat-unit">年</span></div>
+        <div class="stat-note">从传统媒体到新媒体，完整见证2012年以来的移动互联网浪潮</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">全网粉丝</div>
+        <div class="stat-nb">20<span class="stat-unit">万+</span></div>
+        <div class="stat-note">全职自媒体博主，持续输出内容与个人成长心法</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">深度辅导</div>
+        <div class="stat-nb">150<span class="stat-unit">+ 位</span></div>
+        <div class="stat-note">付费学员2000+，其中深度辅导的个人IP学员150余位</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>02 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 3 · 一个问题 ========== -->
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome"><div class="left"><span>Question</span><span class="sep"></span><span>一个问题</span></div><div class="right"><span>03</span></div></div>
+  <div class="frame" style="justify-content:center">
+    <div class="kicker" data-anim>在开始之前，想问大家一个问题</div>
+    <div data-anim>
+      <div class="h-hero" style="font-size:5.8vw;max-width:65vw">你觉得——<br>如果你在个人品牌或个人IP的路上失败了，可能是因为什么？</div>
+    </div>
+    <div class="rule" style="margin:5vh 0" data-anim></div>
+    <div data-anim>
+      <div class="lead" style="opacity:.55;max-width:50vw">（停顿几秒，想想看）</div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>03 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 4 · 根本原因 ========== -->
+<section class="slide dark" data-animate="cascade">
+  <div class="chrome"><div class="left"><span>Insight</span><span class="sep"></span><span>洞察</span></div><div class="right"><span>04</span></div></div>
+  <div class="frame" style="justify-content:center">
+    <div class="kicker" data-anim>深度辅导150位学员后，我的结论</div>
+    <div data-anim>
+      <div class="h1-zh" style="margin-bottom:4vh">根本原因只有一个——</div>
+    </div>
+    <div data-anim>
+      <div class="display-zh" style="font-size:5.6vw">你的心力<br>没有支撑你走下去</div>
+    </div>
+    <div class="callout" style="margin-top:5vh;max-width:55vw" data-anim>
+      <div class="q-big">无论购买的是哪种知识服务，能够拿到结果的人都有一个共同点：<strong>坚持行动、百折不挠的心力，经常保持高能量状态。</strong></div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>04 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 5 · 能量 vs 能力 ========== -->
+<section class="slide light" data-animate="cascade">
+  <div class="chrome"><div class="left"><span>Energy</span><span class="sep"></span><span>能量决定论</span></div><div class="right"><span>05</span></div></div>
+  <div class="frame" style="justify-content:center">
+    <div class="kicker" data-anim style="font-size:max(13px,1.1vw);letter-spacing:.2em;opacity:.8">一位创业者社群主理人的结论</div>
+    <div class="split-55" data-anim>
+      <div class="col">
+        <div class="h2-zh" style="font-size:2.6vw">能力强但能量低</div>
+        <div class="rule"></div>
+        <div class="body-zh">遇到超出能力范围的事情，会因为能量不够而<span class="hi">放弃</span>。</div>
+      </div>
+      <div class="col">
+        <div class="h2-zh" style="font-size:2.6vw">能量强但能力低</div>
+        <div class="rule"></div>
+        <div class="body-zh">遇到超出能力范围的事，他会说<span class="hi">"我可以学"</span>。</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:5vh;max-width:60vw" data-anim>
+      <div class="q-big">创业本身，就是一件不断挑战超出自己能力范围的事。</div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>05 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 6 · 幕封：什么是能量资产 ========== -->
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome"><div class="left"><span>Part I</span><span class="sep"></span><span>第一幕</span></div><div class="right"><span>06</span></div></div>
+  <div class="frame" style="justify-content:center">
+    <div data-anim>
+      <div class="kicker">Part I</div>
+    </div>
+    <div data-anim>
+      <div class="h-hero">什么是个人IP的<br><span style="color:#e8b84b">能量资产</span>？</div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>06 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 7 · 三种角色困境 ========== -->
+<section class="slide light" data-animate="cascade">
+  <div class="chrome"><div class="left"><span>Roles</span><span class="sep"></span><span>角色困境</span></div><div class="right"><span>07</span></div></div>
+  <div class="frame">
+    <div class="kicker" data-anim style="font-size:max(13px,1.1vw);letter-spacing:.2em;opacity:.8">个体创业者必须同时扮演三种角色</div>
+    <div class="grid-3" style="flex:1;align-content:center" data-anim>
+      <div class="pillar">
+        <div class="t">🎨 艺术家</div>
+        <div class="d">策划定位和产品，需要创造性。只有创造出新东西，才能带来真正的改变。不甘于平庸，就应以此为追求。</div>
+      </div>
+      <div class="pillar">
+        <div class="t">🏛 企业家</div>
+        <div class="d">醉心艺术家的风险是孤芳自赏。必须让产品立足社会舞台，为他人提供价值并赚取利润。自我实现在商业关系中完成。</div>
+      </div>
+      <div class="pillar">
+        <div class="t">⚙ 经营者</div>
+        <div class="d">一个人工作，更需要高标准的自我管理。优化流程、管理时间、形成标准——让工作尽可能有序，才能有钱且美。</div>
+      </div>
+    </div>
+    <div data-anim>
+      <div class="callout" style="margin-top:auto;max-width:55vw">
+        <div class="q-big">一个人要同时演三个角色，压力和消耗天然翻倍。</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>07 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 8 · 你就是你的全部生产资料 ========== -->
+<section class="slide dark" data-animate="hero">
+  <div class="chrome"><div class="left"><span>Core</span><span class="sep"></span><span>核心命题</span></div><div class="right"><span>08</span></div></div>
+  <div class="frame" style="justify-content:center">
+    <div class="ghost" style="top:8vh;right:5vw">YOU</div>
+    <div data-anim>
+      <div class="kicker">核心命题</div>
+    </div>
+    <div data-anim>
+      <div class="display-zh" style="font-size:5.8vw">你是你全部的<br>生产资料</div>
+    </div>
+    <div data-anim>
+      <div class="lead" style="margin-top:4vh;max-width:50vw">我们作为个体创业者，我们的身体、心智、情绪，就是我们的厂房、设备、流水线。</div>
+    </div>
+    <div data-anim>
+      <div class="callout" style="margin-top:4vh;max-width:45vw">
+        <div class="q-big">照顾好我们的能量资产，是赚钱和获得幸福感的前提。</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>08 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 9 · 三个维度 ========== -->
+<section class="slide light" data-animate="cascade">
+  <div class="chrome"><div class="left"><span>Dimensions</span><span class="sep"></span><span>三个维度</span></div><div class="right"><span>09</span></div></div>
+  <div class="frame">
+    <div class="kicker" data-anim>个人IP能量资产拆解</div>
+    <div class="grid-3" style="flex:1;align-content:center" data-anim>
+      <div class="stat-card">
+        <div class="stat-label">维度一</div>
+        <div class="stat-nb" style="font-size:3.6vw;font-family:var(--serif-zh)">觉知力</div>
+        <div class="stat-note">一种高级的"看"——同时看到细节和整体</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">维度二</div>
+        <div class="stat-nb" style="font-size:3.6vw;font-family:var(--serif-zh)">流动力</div>
+        <div class="stat-note">让能量良好运转——高能量的秘诀不是"攒"，而是"流"</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">维度三</div>
+        <div class="stat-nb" style="font-size:3.6vw;font-family:var(--serif-zh)">目标管理力</div>
+        <div class="stat-note">目标管理和注意力管理，就是心力管理</div>
+      </div>
+    </div>
+    <div data-anim>
+      <div class="body-zh" style="margin-top:3vh;opacity:.7">中医李辛老师说：所谓的"阳气"，就是指能量良好的流动状态。</div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>09 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 10 · 幕封：能量陷阱 ========== -->
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome"><div class="left"><span>Part II</span><span class="sep"></span><span>第二幕</span></div><div class="right"><span>10</span></div></div>
+  <div class="frame" style="justify-content:center">
+    <div data-anim>
+      <div class="kicker">Part II</div>
+    </div>
+    <div data-anim>
+      <div class="h-hero">个人IP的<br>能量陷阱</div>
+    </div>
+    <div data-anim>
+      <div class="h-sub" style="margin-top:3vh">做个人IP的路上，有非常多的能量陷阱<br>稍不注意就会陷入其中</div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>10 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 11 · 能量陷阱地图 ========== -->
+<section class="slide light" data-animate="cascade">
+  <div class="chrome"><div class="left"><span>Traps</span><span class="sep"></span><span>能量陷阱地图</span></div><div class="right"><span>11</span></div></div>
+  <div class="frame">
+    <div class="kicker" data-anim>这些陷阱你遇到过几个？</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:2vw 3vw;flex:1;align-content:start" data-anim>
+      <div class="stat-card">
+        <div class="stat-label">01</div>
+        <div style="font-family:var(--serif-zh);font-weight:700;font-size:1.6vw;margin-top:1vh">亲友的议论</div>
+        <div class="stat-note">"你怎么还在搞这个""这能赚钱吗"</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">02</div>
+        <div style="font-family:var(--serif-zh);font-weight:700;font-size:1.6vw;margin-top:1vh">不友好的留言</div>
+        <div class="stat-note">陌生人一句嘲讽，就能让你破防</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">03</div>
+        <div style="font-family:var(--serif-zh);font-weight:700;font-size:1.6vw;margin-top:1vh">内容浏览量</div>
+        <div class="stat-note">数据没达到预期，就非常失望</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">04</div>
+        <div style="font-family:var(--serif-zh);font-weight:700;font-size:1.6vw;margin-top:1vh">账号涨粉量</div>
+        <div class="stat-note">看到别人涨粉快，就开始焦虑</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">05</div>
+        <div style="font-family:var(--serif-zh);font-weight:700;font-size:1.6vw;margin-top:1vh">业务收入和增速</div>
+        <div class="stat-note">变现不如预期，怀疑自己不适合做这个</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:auto;max-width:50vw" data-anim>
+      <div class="q-big">你的课题是照顾和发展自己，把别人的课题留给别人就好。</div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>11 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 12 · 三大能量泄漏源 ========== -->
+<section class="slide dark" data-animate="cascade">
+  <div class="chrome"><div class="left"><span>Leaks</span><span class="sep"></span><span>能量泄漏源</span></div><div class="right"><span>12</span></div></div>
+  <div class="frame">
+    <div class="kicker" data-anim style="font-size:max(13px,1.1vw);letter-spacing:.2em;opacity:.8">注意力管理失败导致的能量泄漏</div>
+    <div class="grid-3" style="flex:1;align-content:start" data-anim>
+      <div class="pillar">
+        <div class="t" style="font-size:2.8vw">📰 新闻</div>
+        <div class="d">社会新闻、负面新闻、娱乐、热搜——口水战的导火索、奶头乐、电子芥末。</div>
+        <div class="callout" style="padding:1.5vh 1.5vw;font-size:max(13px,1vw)">"新闻看多会变傻。"<br><span class="cite">—— 一位老新闻人</span></div>
+      </div>
+      <div class="pillar">
+        <div class="t" style="font-size:2.8vw">📱 碎片化娱乐</div>
+        <div class="d">"研究爆款"是注意力沦陷的最好借口。洞悉传播规律后，大多爆款无非换着手指按人性按钮。</div>
+        <div class="callout" style="padding:1.5vh 1.5vw;font-size:max(13px,1vw)">"别特么划了！"</div>
+      </div>
+      <div class="pillar">
+        <div class="t" style="font-size:2.8vw">👀 同行动态</div>
+        <div class="d">比较之心是能量陷阱之一。如果无法在比较后保持平常心，最好的办法就是——不看。</div>
+        <div class="callout" style="padding:1.5vh 1.5vw;font-size:max(13px,1vw)">用自己的节奏，跑自己的赛道。</div>
+      </div>
+    </div>
+    <div data-anim>
+      <div class="body-zh" style="margin-top:3vh;opacity:.6;text-align:center">注意力就是我们的生产力。而我们的生产工具——智能手机和电脑——天然是被设计出来抢夺我们注意力的。</div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>12 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 13 · 幕封：能量资产系统 ========== -->
+<section class="slide hero light" data-animate="hero">
+  <div class="chrome"><div class="left"><span>Part III</span><span class="sep"></span><span>第三幕</span></div><div class="right"><span>13</span></div></div>
+  <div class="frame" style="justify-content:center">
+    <div data-anim>
+      <div class="kicker">Part III</div>
+    </div>
+    <div data-anim>
+      <div class="h-hero" style="font-size:7.2vw">打造持续成长的<br>能量资产系统</div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>13 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 14 · 能量定投策略 ========== -->
+<section class="slide light" data-animate="cascade">
+  <div class="chrome"><div class="left"><span>Invest</span><span class="sep"></span><span>能量定投</span></div><div class="right"><span>14</span></div></div>
+  <div class="frame">
+    <div class="kicker" data-anim>穿越周期的能量定投策略</div>
+    <div class="body-zh" style="margin-bottom:3vh" data-anim>最适合普通人的投资策略是选择宽基指数坚持定投。穿越周期的人生策略也是同样的——</div>
+    <div class="pipeline" data-cols="4" data-anim>
+      <div class="step">
+        <div class="step-nb">01</div>
+        <div class="step-title">学习</div>
+        <div class="step-desc">读书、听课、与优秀朋友交流。改变大脑，就是改变时间的分配方式。</div>
+      </div>
+      <div class="step">
+        <div class="step-nb">02</div>
+        <div class="step-title">输出</div>
+        <div class="step-desc">没有输出过的思考不是真正的思考。写出来，才能感到自己的进步。</div>
+      </div>
+      <div class="step">
+        <div class="step-nb">03</div>
+        <div class="step-title">正念</div>
+        <div class="step-desc">锻炼觉知力。觉知就是自己观测自己。一旦被观测，改变就会发生。</div>
+      </div>
+      <div class="step">
+        <div class="step-nb">04</div>
+        <div class="step-title">运动</div>
+        <div class="step-desc">找到适合自己体质的运动方式。身体是一切之本。</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:auto;max-width:50vw" data-anim>
+      <div class="q-big">这四个定投项，不需要你一下子全做到。选一个，先做起来。关键是持续，不是金额。</div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>14 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 15 · 从目标到价值 ========== -->
+<section class="slide dark" data-animate="directional">
+  <div class="chrome"><div class="left"><span>Shift</span><span class="sep"></span><span>思维转换</span></div><div class="right"><span>15</span></div></div>
+  <div class="frame" style="justify-content:center">
+    <div class="kicker" data-anim="left" style="text-align:center">从目标导向到价值导向 · 从有限游戏到无限游戏</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center" data-anim="left">
+      <div style="text-align:right;padding:4vh 3vw 4vh 0" data-anim="left">
+        <div class="h2-zh" style="font-size:3.4vw;opacity:.45;margin-bottom:3vh">目标导向</div>
+        <div class="body-zh" style="font-size:max(17px,1.5vw);opacity:.65">"我到底能不能做得好？"</div>
+        <div class="body-zh" style="opacity:.4;margin-top:2vh;font-size:max(15px,1.2vw)">这是一个<span class="hi">审判</span></div>
+      </div>
+      <div style="border-left:1px solid rgba(255,255,255,.15);padding:4vh 0 4vh 4vw" data-anim="right">
+        <div class="h2-zh" style="font-size:3.4vw;color:#e8b84b;margin-bottom:3vh">价值导向</div>
+        <div class="body-zh" style="font-size:max(20px,1.7vw)">"我怎样才能做得越来越好？"</div>
+        <div class="body-zh" style="opacity:.7;margin-top:2vh;font-size:max(15px,1.2vw)">这是一个<span class="hi">邀请</span></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:4vh;max-width:55vw;margin-inline:auto" data-anim="left">
+      <div class="q-big">有限游戏存在成败输赢。无限游戏没有明确边界和胜利条件。价值创造和个人成长，就是典型的无限游戏。</div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>15 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 16 · 法则一和法则二 ========== -->
+<section class="slide light" data-animate="cascade">
+  <div class="chrome"><div class="left"><span>Rules</span><span class="sep"></span><span>心力法则</span></div><div class="right"><span>16</span></div></div>
+  <div class="frame">
+    <div class="kicker" data-anim>瞬间提升心力能量的法则</div>
+    <div class="split" style="flex:1;align-items:start" data-anim>
+      <div class="col">
+        <div class="h2-zh" style="font-size:3vw">法则一</div>
+        <div class="h1-zh" style="font-size:4vw;margin-top:1vh">决定的力量</div>
+        <div class="rule"></div>
+        <div class="body-zh">重要的是，先有一个决定：<strong>我要做。</strong></div>
+        <div class="body-zh" style="margin-top:1.5vh">决定，解决"做"或"不做"的问题。这是最根本的选择。</div>
+        <div class="body-zh" style="margin-top:1.5vh">怎么做的答案特别简单——<strong>随便做。</strong></div>
+        <div class="callout" style="margin-top:2vh">
+          <div class="q-big">如果你不为你发的内容感到一点点尴尬，说明你开始得太晚了。</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="h2-zh" style="font-size:3vw">法则二</div>
+        <div class="h1-zh" style="font-size:4vw;margin-top:1vh">练习的心态</div>
+        <div class="rule"></div>
+        <div class="body-zh">以<strong>考试</strong>的心态面对生活，必然瞻前顾后患得患失——因为丢一分都让人纠结难过。</div>
+        <div class="body-zh" style="margin-top:2vh">但以<strong>练习</strong>的心态，我们就会更专注在按方法做事，不奢望马上看到反馈，不急于求成。</div>
+        <div class="body-zh" style="margin-top:2vh;opacity:.6">现在正在做的事情，是对什么的练习？</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>16 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 17 · 法则三和法则四 ========== -->
+<section class="slide dark" data-animate="cascade">
+  <div class="chrome"><div class="left"><span>Rules</span><span class="sep"></span><span>心力法则</span></div><div class="right"><span>17</span></div></div>
+  <div class="frame">
+    <div class="kicker" data-anim>瞬间提升心力能量的法则</div>
+    <div class="split" style="flex:1;align-items:start" data-anim>
+      <div class="col">
+        <div class="h2-zh" style="font-size:3vw">法则三</div>
+        <div class="h1-zh" style="font-size:4vw;margin-top:1vh">具体行动</div>
+        <div class="rule"></div>
+        <div class="body-zh" style="font-size:max(17px,1.4vw)"><strong>具体，是焦虑的反义词。</strong></div>
+        <div class="body-zh" style="margin-top:1.5vh">具体，引导我们以更精细的分辨率认知和贴近真实。活在现实中，而不是活在模糊的感觉里。</div>
+      </div>
+      <div class="col">
+        <div class="h2-zh" style="font-size:3vw">法则四</div>
+        <div class="h1-zh" style="font-size:4vw;margin-top:1vh">真实</div>
+        <div class="rule"></div>
+        <div class="body-zh" style="font-size:max(17px,1.4vw)"><strong>真实自有万钧之力。</strong></div>
+        <div class="body-zh" style="margin-top:1.5vh">你不需要装高能量，你只需要承认你此刻的状态。当你呈现真实的自己，才能让生命能量通过你的一切行为感染到他人。</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>17 / 18</span></div>
+</section>
+
+<!-- ========== SLIDE 18 · 收束 ========== -->
+<section class="slide hero dark" data-animate="hero">
+  <div class="chrome"><div class="left"><span>Thank You</span><span class="sep"></span><span>谢谢</span></div><div class="right"><span>18 / 18</span></div></div>
+  <div class="frame" style="justify-content:center">
+    <div data-anim>
+      <div class="kicker">守护好你的能量资产</div>
+    </div>
+    <div data-anim>
+      <div class="display-zh" style="font-size:5.2vw">你就是你的<br>全部生产资料</div>
+    </div>
+    <div class="rule" style="margin:5vh 0" data-anim></div>
+    <div data-anim>
+      <div class="lead" style="opacity:.6;max-width:45vw">真实自有万钧之力。<br>用自己的节奏，跑自己的赛道。</div>
+    </div>
+    <div data-anim>
+      <div class="meta-row" style="margin-top:6vh">
+        <span>老杨</span>
+        <span>·</span>
+        <span>2026.05.24 · 杭州</span>
+        <span>·</span>
+        <span>小鹅通线下分享</span>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span class="title">守护好个人IP的能量资产</span><span>18 / 18</span></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+const deck=document.getElementById('deck');const slides=deck.querySelectorAll('.slide');const nav=document.getElementById('nav');let idx=0,total=slides.length,lock=false;deck.style.width=(total*100)+'vw';slides.forEach((s,i)=>{const b=document.createElement('button');b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));b.onclick=()=>go(i);nav.appendChild(b)});function go(n){if(lock)return;idx=Math.max(0,Math.min(total-1,n));window.__currentSlideIndex=idx;deck.style.transform=`translateX(${-idx*100}vw)`;nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));const el=slides[idx];const th=el.dataset.theme||(el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));document.body.classList.toggle('light-bg',th==='light');if(window.__playSlide)setTimeout(()=>window.__playSlide(idx),450);lock=true;setTimeout(()=>lock=false,700)}go(0);addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();go(idx<total/2?total-1:0);return}if(e.key&&e.key.toLowerCase()==='b'&&!e.metaKey&&!e.ctrlKey&&!e.altKey){e.preventDefault();window.__setLowPowerMode(!window.__lowPowerMode);return}if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown'){if(window.__pipeAdvance&&window.__pipeAdvance())return;go(idx+1);return}if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);if(e.key==='Home')go(0);if(e.key==='End')go(total-1)});let wheelTO=null,wheelAcc=0;addEventListener('wheel',e=>{wheelAcc+=e.deltaY+e.deltaX;if(Math.abs(wheelAcc)>50){if(wheelAcc>0&&window.__pipeAdvance&&window.__pipeAdvance()){wheelAcc=0}else{go(idx+(wheelAcc>0?1:-1));wheelAcc=0}}clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150)},{passive:true});
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+<script type="module">
+let motion;try{motion=await import('./assets/motion.min.js')}catch(e1){try{motion=await import('https://cdn.jsdelivr.net/npm/motion@11.11.17/+esm')}catch(e2){console.warn('[motion] failed',e1,e2);document.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'})}}if(motion){const{animate,stagger}=motion;document.body.classList.add('motion-ready');const EASE=[.22,1,.36,1];const slideList=[...document.querySelectorAll('.slide')];let pipeStep=-1,lastIdx=-1;function resetAnims(s){s.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='';el.style.transform=''})}function revealStatic(s){resetAnims(s);document.getAnimations?.().forEach(a=>a.cancel());s.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='1';el.style.transform='none'})}function playSlide(i){const s=slideList[i];if(!s)return;lastIdx=i;const recipe=s.dataset.animate||(s.classList.contains('hero')?'hero':'cascade');if(window.__lowPowerMode){revealStatic(s);return}if(recipe==='pipeline'){pipeStep=-1;s.querySelectorAll('[data-anim]').forEach(el=>{el.style.opacity='0.15';el.style.transform='none'});return}resetAnims(s);const all=[...s.querySelectorAll('[data-anim]')];if(!all.length)return;if(recipe==='directional'){const lefts=all.filter(el=>el.dataset.anim==='left');const divs=all.filter(el=>el.dataset.anim==='divider');const rights=all.filter(el=>el.dataset.anim==='right');const others=all.filter(el=>!['left','right','divider'].includes(el.dataset.anim));if(others.length)animate(others,{opacity:[0,1],y:[12,0]},{duration:.6,delay:stagger(.1,{start:.15}),easing:EASE});if(lefts.length)animate(lefts,{opacity:[0,1],x:[-24,0]},{duration:.8,delay:.35,easing:EASE});if(divs.length)animate(divs,{opacity:[0,.25]},{duration:.5,delay:.9});if(rights.length)animate(rights,{opacity:[0,1],x:[24,0]},{duration:.8,delay:1,easing:EASE});return}if(recipe==='quote'){const lines=all.filter(el=>el.dataset.anim==='line');const others=all.filter(el=>el.dataset.anim!=='line');if(others.length)animate(others,{opacity:[0,1],y:[8,0]},{duration:.6,delay:stagger(.12,{start:.2}),easing:EASE});if(lines.length)animate(lines,{opacity:[.35,1],y:[10,0]},{duration:.8,delay:stagger(.55,{start:.5}),easing:EASE});return}if(recipe==='hero'){animate(all,{opacity:[0,1],y:[14,0]},{duration:.9,delay:stagger(.16,{start:.2}),easing:EASE});return}animate(all,{opacity:[0,1],y:[16,0]},{duration:.75,delay:stagger(.1,{start:.15}),easing:EASE})}function pipeAdvance(){if(window.__lowPowerMode)return false;const s=slideList[lastIdx];if(!s||s.dataset.animate!=='pipeline')return false;const steps=[...s.querySelectorAll('[data-anim="step"]')];const arrows=[...s.querySelectorAll('[data-anim="arrow"]')];if(pipeStep>=steps.length-1)return false;pipeStep++;animate(steps[pipeStep],{opacity:[.15,1],y:[8,0]},{duration:.5,easing:EASE});if(pipeStep>0&&arrows[pipeStep-1])animate(arrows[pipeStep-1],{opacity:[.15,.7]},{duration:.3,delay:.15});return true}window.__playSlide=playSlide;window.__pipeAdvance=pipeAdvance;playSlide(0)}
+</script>
+</body>
+</html>
