@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>昱轩的演示文稿</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #faf9f6;
+    --accent: #c0392b;
+    --gold: #d4a053;
+    --muted: #6b6b6b;
+    --border: #e0dcd5;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a08;
+    font-family: 'Noto Sans SC', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    color: #faf9f6;
+  }
+  .container {
+    max-width: 800px;
+    width: 100%;
+  }
+  h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 42px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--gold);
+  }
+  .subtitle {
+    text-align: center;
+    color: rgba(250,249,246,0.5);
+    font-size: 16px;
+    margin-bottom: 48px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.1em;
+  }
+  .deck-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .deck-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px 28px;
+    border-radius: 12px;
+    background: rgba(250,249,246,0.04);
+    border: 1px solid rgba(250,249,246,0.08);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+  }
+  .deck-card:hover {
+    background: rgba(250,249,246,0.08);
+    border-color: rgba(212,160,83,0.3);
+    transform: translateX(4px);
+  }
+  .deck-num {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--gold);
+    opacity: 0.7;
+    min-width: 50px;
+  }
+  .deck-info { flex: 1; }
+  .deck-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .deck-desc {
+    font-size: 14px;
+    color: rgba(250,249,246,0.4);
+  }
+  .deck-arrow {
+    font-size: 20px;
+    color: rgba(250,249,246,0.2);
+    transition: all 0.2s;
+  }
+  .deck-card:hover .deck-arrow {
+    color: var(--gold);
+    transform: translateX(4px);
+  }
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    font-size: 13px;
+    color: rgba(250,249,246,0.25);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .footer a { color: var(--gold); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>昱轩的<em>演示文稿</em></h1>
+  <div class="subtitle">HTML PRESENTATIONS · hy198619.github.io</div>
+
+  <div class="deck-list">
+
+    <a class="deck-card" href="05-如何用AIAgent打造个人IP写作系统.html">
+      <div class="deck-num">05</div>
+      <div class="deck-info">
+        <div class="deck-title">如何用 AI Agent 打造个人 IP 写作系统？</div>
+        <div class="deck-desc">北辰青年线下分享 · 2026.05.30</div>
+      </div>
+      <div class="deck-arrow">→</div>
+    </a>
+
+    <a class="deck-card" href="03-一人公司AI产品开发合规指南.html">
+      <div class="deck-num">03</div>
+      <div class="deck-info">
+        <div class="deck-title">一人公司 AI 产品开发合规指南</div>
+        <div class="deck-desc">AI-101 社群分享</div>
+      </div>
+      <div class="deck-arrow">→</div>
+    </a>
+
+    <a class="deck-card" href="04-聊聊Markdown和HTML.html">
+      <div class="deck-num">04</div>
+      <div class="deck-info">
+        <div class="deck-title">聊聊 Markdown 和 HTML</div>
+        <div class="deck-desc">AI-101 社群分享</div>
+      </div>
+      <div class="deck-arrow">→</div>
+    </a>
+
+    <a class="deck-card" href="01-守护好个人IP的能量资产.html">
+      <div class="deck-num">01</div>
+      <div class="deck-info">
+        <div class="deck-title">守护好个人IP的能量资产</div>
+        <div class="deck-desc">小鹅通杭州线下分享</div>
+      </div>
+      <div class="deck-arrow">→</div>
+    </a>
+
+    <a class="deck-card" href="02-用内容搭建你的小而美商业系统.html">
+      <div class="deck-num">02</div>
+      <div class="deck-info">
+        <div class="deck-title">用内容搭建你的小而美商业系统</div>
+        <div class="deck-desc">社群分享</div>
+      </div>
+      <div class="deck-arrow">→</div>
+    </a>
+
+  </div>
+
+  <div class="footer">
+    <a href="https://github.com/hy198619/html-presentations">GitHub 仓库</a> · 用 ← → 键翻页演示
+  </div>
+</div>
+</body>
+</html>
